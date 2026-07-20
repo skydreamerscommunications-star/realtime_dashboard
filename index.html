@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Realtime Operations Dashboard</title>
+
+  <!-- TailwindCSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    /* Custom CSS – design tokens and overrides */
+    :root {
+      --primary: #2563eb;     /* blue-600 */
+      --success: #16a34a;     /* green-600 */
+      --emerald: #059669;     /* emerald-600 */
+      --danger: #dc2626;      /* red-600 */
+      --warning: #d97706;     /* amber-600 */
+      --muted: #6b7280;       /* gray-500 */
+      --border: #e5e7eb;      /* gray-200 */
+      --surface: #ffffff;
+      --background: #f8fafc;  /* slate-50 */
+      --text: #0f172a;        /* slate-900 */
+      --text-secondary: #475569; /* slate-600 */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background);
+      color: var(--text);
+      padding: 24px 32px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Main container – no scroll */
+    .dashboard-container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      border: 1px solid var(--border);
+      transition: box-shadow 0.15s ease;
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    /* KPI cards */
+    .kpi-icon {
+      width: 20px;
+      height: 20px;
+      stroke-width: 1.75;
+    }
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .kpi-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.01em;
+    }
+    .kpi-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+    .kpi-status {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #f1f5f9;
+    }
+    .kpi-status.accelerating { color: #16a34a; background: #dcfce7; }
+    .kpi-status.slowing { color: #dc2626; background: #fee2e2; }
+    .kpi-status.steady { color: #6b7280; background: #f3f4f6; }
+
+    /* Chart container */
+    #trend-chart {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 220px;
+    }
+
+    /* Table */
+    .agent-table th {
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-secondary);
+      background: #f1f5f9;
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .agent-table td {
+      padding: 8px 12px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .agent-table tbody tr:nth-child(even) {
+      background: #fafbfc;
+    }
+    .agent-table tbody tr:hover {
+      background: #f1f5f9;
+    }
+
+    /* Reviews */
+    .review-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+    .review-row:last-child {
+      border-bottom: none;
+    }
+    .review-time {
+      color: var(--text-secondary);
+      width: 70px;
+      flex-shrink: 0;
+    }
+    .review-agent {
+      font-weight: 500;
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .review-dispo, .review-outcome {
+      width: 80px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+    .status-badge.live {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+    .status-badge.break {
+      background: #fef3c7;
+      color: #d97706;
+    }
+    .status-badge.pre_shift, .status-badge.post_shift, .status-badge.inactive {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    /* Header right items */
+    .header-meta {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .header-meta strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+    .header-meta .time {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* Pulse animation for LIVE */
+    @keyframes soft-pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    .status-badge.live.pulse {
+      animation: soft-pulse 2s ease-in-out infinite;
+    }
+
+    /* Responsive tweaks: reduce padding on smaller screens but still no scroll */
+    @media (max-width: 1280px) {
+      body { padding: 16px 20px; }
+      .kpi-value { font-size: 24px; }
+    }
+    @media (max-width: 1024px) {
+      .kpi-value { font-size: 20px; }
+      .kpi-label { font-size: 12px; }
+      .agent-table td, .agent-table th { font-size: 12px; padding: 6px 8px; }
+      .review-row { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-container" id="app">
+
+  <!-- ===== HEADER ===== -->
+  <header class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-semibold tracking-tight">Realtime Dashboard</h1>
+    <div class="flex items-center gap-6">
+      <div class="header-meta">
+        <span class="text-muted-foreground">Last Activity</span>
+        <span class="time" id="lastActivity">—</span>
+      </div>
+      <div class="header-meta">
+        <span class="text-muted-foreground">Updated</span>
+        <span class="time" id="updatedAt">—</span>
+      </div>
+      <div id="statusBadge" class="status-badge">—</div>
+    </div>
+  </header>
+
+  <!-- ===== KPI CARDS ===== -->
+  <section class="grid grid-cols-5 gap-4 mb-6">
+    <!-- Transfers -->
+    <div class="card p-4 flex flex-col">
+      <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="file-text" class="kpi-icon text-blue-600"></i>
+        <span class="kpi-label">Transfers</span>
+      </div>
+      <div class="kpi-value" id="kpi-transfers-value">0</div>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="kpi-sub" id="kpi-transfers-rate">FPH 0.0</span>
+        <span class="kpi-status" id="kpi-transfers-status">—</span>
+      </div>
+    </div>
+    <!-- Qualified -->
+    <div class="card p-4 flex flex-col">
+      <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="check-circle" class="kpi-icon text-green-600"></i>
+        <span class="kpi-label">Qualified</span>
+      </div>
+      <div class="kpi-value" id="kpi-qualified-value">0</div>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="kpi-sub" id="kpi-qualified-rate">QPH 0.0</span>
+        <span class="kpi-status" id="kpi-qualified-status">—</span>
+      </div>
+    </div>
+    <!-- Converted -->
+    <div class="card p-4 flex flex-col">
+      <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="trending-up" class="kpi-icon text-emerald-600"></i>
+        <span class="kpi-label">Converted</span>
+      </div>
+      <div class="kpi-value" id="kpi-converted-value">0</div>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="kpi-sub" id="kpi-converted-progress">Goal 0%</span>
+      </div>
+    </div>
+    <!-- Not Qualified -->
+    <div class="card p-4 flex flex-col">
+      <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="x-circle" class="kpi-icon text-red-600"></i>
+        <span class="kpi-label">Not Qualified</span>
+      </div>
+      <div class="kpi-value" id="kpi-notqualified-value">0</div>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="kpi-sub" id="kpi-notqualified-rate">DNQ 0.0%</span>
+      </div>
+    </div>
+    <!-- Declined -->
+    <div class="card p-4 flex flex-col">
+      <div class="flex items-center gap-2 mb-1">
+        <i data-lucide="alert-circle" class="kpi-icon text-amber-600"></i>
+        <span class="kpi-label">Declined</span>
+      </div>
+      <div class="kpi-value" id="kpi-declined-value">0</div>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="kpi-sub" id="kpi-declined-rate">Drop 0.0%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CHART + REVIEWS ROW ===== -->
+  <section class="grid grid-cols-3 gap-6 mb-6">
+    <!-- Chart (65%) -->
+    <div class="card col-span-2 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <span class="font-medium text-sm text-secondary">Hourly Trend</span>
+        <div class="flex items-center gap-3 text-xs text-secondary">
+          <span><span class="inline-block w-2 h-2 rounded-full bg-blue-600 mr-1"></span>Transfers</span>
+          <span><span class="inline-block w-2 h-2 rounded-full bg-green-600 mr-1"></span>Qualified</span>
+          <span><span class="inline-block w-2 h-2 rounded-full bg-emerald-600 mr-1"></span>Converted</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 200px;">
+        <canvas id="trend-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Latest Reviews (35%) -->
+    <div class="card col-span-1 p-4 flex flex-col">
+      <div class="flex items-center justify-between mb-3">
+        <span class="font-medium text-sm text-secondary">Latest Reviews</span>
+        <span class="text-xs text-secondary" id="review-count">0</span>
+      </div>
+      <div class="flex-1 overflow-hidden">
+        <div id="reviews-container" class="space-y-1">
+          <!-- rows inserted by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== AGENT LEADERBOARD ===== -->
+  <section class="card p-4">
+    <div class="flex items-center justify-between mb-3">
+      <span class="font-medium text-sm text-secondary">Agent Performance</span>
+      <span class="text-xs text-secondary" id="agent-count">0 agents</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="agent-table w-full">
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th class="text-center">Transfers</th>
+            <th class="text-center">Qualified</th>
+            <th class="text-center">Converted</th>
+            <th class="text-center">DNQ</th>
+            <th class="text-right">Last Activity</th>
+          </tr>
+        </thead>
+        <tbody id="agent-tbody">
+          <!-- rows inserted by JS -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+  // ============================================================
+  // FIREBASE CONFIG
+  // ============================================================
+  const firebaseConfig = {
+    databaseURL: "https://performance-dashboard-c7017-default-rtdb.firebaseio.com/"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const dbRef = db.ref('transfers_dashboard');
+
+  // ============================================================
+  // DOM REFERENCES
+  // ============================================================
+  const $ = id => document.getElementById(id);
+  const lastActivityEl = $('lastActivity');
+  const updatedAtEl = $('updatedAt');
+  const statusBadge = $('statusBadge');
+
+  const kpi = {
+    transfers: { value: $('kpi-transfers-value'), rate: $('kpi-transfers-rate'), status: $('kpi-transfers-status') },
+    qualified: { value: $('kpi-qualified-value'), rate: $('kpi-qualified-rate'), status: $('kpi-qualified-status') },
+    converted: { value: $('kpi-converted-value'), progress: $('kpi-converted-progress') },
+    notQualified: { value: $('kpi-notqualified-value'), rate: $('kpi-notqualified-rate') },
+    declined: { value: $('kpi-declined-value'), rate: $('kpi-declined-rate') }
+  };
+  const reviewsContainer = $('reviews-container');
+  const reviewCount = $('review-count');
+  const agentTbody = $('agent-tbody');
+  const agentCount = $('agent-count');
+
+  let chartInstance = null;
+  let currentData = null;
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function timeAgo(isoString) {
+    if (!isoString) return '—';
+    const now = Date.now();
+    const then = new Date(isoString).getTime();
+    const diff = Math.max(0, now - then);
+    const seconds = Math.floor(diff / 1000);
+    if (seconds < 60) return seconds + 's ago';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return minutes + 'm ago';
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + 'h ago';
+    return new Date(isoString).toLocaleString();
+  }
+
+  function formatNumber(n) {
+    if (n === undefined || n === null) return '0';
+    return n.toLocaleString();
+  }
+
+  function formatPercent(n) {
+    if (n === undefined || n === null) return '0%';
+    return (n * 100).toFixed(1) + '%';
+  }
+
+  function statusClass(status) {
+    if (!status) return '';
+    const s = status.toLowerCase();
+    if (s === 'accelerating') return 'accelerating';
+    if (s === 'slowing') return 'slowing';
+    if (s === 'steady') return 'steady';
+    return '';
+  }
+
+  // ============================================================
+  // RENDER FUNCTIONS
+  // ============================================================
+  function renderMeta(meta) {
+    if (!meta) return;
+    lastActivityEl.textContent = timeAgo(meta.lastActivityTimestamp);
+    updatedAtEl.textContent = timeAgo(meta.generatedTimestamp);
+    // Status badge
+    const state = meta.state || 'INACTIVE';
+    const stateLower = state.toLowerCase();
+    let label = state;
+    let cls = 'status-badge';
+    if (stateLower === 'live') cls += ' live pulse';
+    else if (stateLower === 'break') cls += ' break';
+    else cls += ' pre_shift';
+    statusBadge.className = cls;
+    statusBadge.textContent = label;
+  }
+
+  function renderSummary(summary) {
+    if (!summary) return;
+    // Transfers
+    kpi.transfers.value.textContent = formatNumber(summary.transfers?.value);
+    kpi.transfers.rate.textContent = 'FPH ' + (summary.transfers?.rate || 0).toFixed(1);
+    const tStatus = summary.transfers?.status || '';
+    kpi.transfers.status.textContent = tStatus || '—';
+    kpi.transfers.status.className = 'kpi-status ' + statusClass(tStatus);
+
+    // Qualified
+    kpi.qualified.value.textContent = formatNumber(summary.qualified?.value);
+    kpi.qualified.rate.textContent = 'QPH ' + (summary.qualified?.rate || 0).toFixed(1);
+    const qStatus = summary.qualified?.status || '';
+    kpi.qualified.status.textContent = qStatus || '—';
+    kpi.qualified.status.className = 'kpi-status ' + statusClass(qStatus);
+
+    // Converted
+    kpi.converted.value.textContent = formatNumber(summary.converted?.value);
+    const goal = summary.converted?.goal || 0;
+    const progress = summary.converted?.progress || 0;
+    kpi.converted.progress.textContent = 'Goal ' + formatPercent(progress) + (goal > 0 ? ` (${formatNumber(goal)})` : '');
+
+    // Not Qualified
+    kpi.notQualified.value.textContent = formatNumber(summary.notQualified?.value);
+    kpi.notQualified.rate.textContent = 'DNQ ' + formatPercent(summary.notQualified?.rate || 0);
+
+    // Declined
+    kpi.declined.value.textContent = formatNumber(summary.declined?.value);
+    kpi.declined.rate.textContent = 'Drop ' + formatPercent(summary.declined?.rate || 0);
+  }
+
+  function renderReviews(reviews) {
+    if (!reviews || reviews.length === 0) {
+      reviewsContainer.innerHTML = '<div class="text-xs text-secondary">No reviews yet</div>';
+      reviewCount.textContent = '0';
+      return;
+    }
+    // filter out placeholders
+    const real = reviews.filter(r => !r.isPlaceholder);
+    reviewCount.textContent = real.length;
+    if (real.length === 0) {
+      reviewsContainer.innerHTML = '<div class="text-xs text-secondary">No reviews yet</div>';
+      return;
+    }
+    let html = '';
+    real.forEach(r => {
+      const time = new Date(r.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      html += `
+        <div class="review-row">
+          <span class="review-time">${time}</span>
+          <span class="review-agent">${r.agent || '—'}</span>
+          <span class="review-dispo">${r.dispo || '—'}</span>
+          <span class="review-outcome">${r.outcome || '—'}</span>
+        </div>
+      `;
+    });
+    reviewsContainer.innerHTML = html;
+  }
+
+  function renderLeaderboard(leaderboard) {
+    if (!leaderboard || leaderboard.length === 0) {
+      agentTbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary text-sm">No agents</td></tr>';
+      agentCount.textContent = '0 agents';
+      return;
+    }
+    const real = leaderboard.filter(a => !a.isPlaceholder);
+    agentCount.textContent = real.length + ' agents';
+    if (real.length === 0) {
+      agentTbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary text-sm">No agents</td></tr>';
+      return;
+    }
+    let html = '';
+    real.forEach(a => {
+      const last = a.lastActivity ? timeAgo(a.lastActivity) : '—';
+      html += `
+        <tr>
+          <td class="font-medium">${a.agent || 'Unknown'}</td>
+          <td class="text-center">${a.transfers || 0}</td>
+          <td class="text-center">${a.qualified || 0}</td>
+          <td class="text-center">${a.converted || 0}</td>
+          <td class="text-center">${a.dnq || 0}</td>
+          <td class="text-right text-secondary text-sm">${last}</td>
+        </tr>
+      `;
+    });
+    agentTbody.innerHTML = html;
+  }
+
+  function renderChart(trend) {
+    if (!trend) return;
+    const transfers = trend.transfers || [];
+    const qualified = trend.qualified || [];
+    const converted = trend.converted || [];
+
+    // Labels: hour strings
+    const labels = transfers.map(p => p.hour || '');
+
+    // Values (real numbers)
+    const tData = transfers.map(p => p.value || 0);
+    const qData = qualified.map(p => p.value || 0);
+    const cData = converted.map(p => p.value || 0);
+
+    const ctx = document.getElementById('trend-chart').getContext('2d');
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Transfers',
+            data: tData,
+            borderColor: '#2563eb',
+            backgroundColor: 'transparent',
+            tension: 0.2,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            borderWidth: 2,
+          },
+          {
+            label: 'Qualified',
+            data: qData,
+            borderColor: '#16a34a',
+            backgroundColor: 'transparent',
+            tension: 0.2,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            borderWidth: 2,
+          },
+          {
+            label: 'Converted',
+            data: cData,
+            borderColor: '#059669',
+            backgroundColor: 'transparent',
+            tension: 0.2,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            borderWidth: 2,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + context.parsed.y;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: true, color: '#f1f5f9' },
+            ticks: { font: { size: 10 }, color: '#6b7280', maxTicksLimit: 15 }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: '#f1f5f9' },
+            ticks: { font: { size: 10 }, color: '#6b7280' }
+          }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        }
+      }
+    });
+  }
+
+  // ============================================================
+  // FULL UPDATE
+  // ============================================================
+  function updateDashboard(data) {
+    if (!data) return;
+    currentData = data;
+    const { summary, trend, leaderboard, reviews, meta } = data;
+    renderMeta(meta);
+    renderSummary(summary);
+    renderReviews(reviews);
+    renderLeaderboard(leaderboard);
+    renderChart(trend);
+  }
+
+  // ============================================================
+  // FIREBASE REALTIME LISTENER
+  // ============================================================
+  dbRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      updateDashboard(data);
+    } else {
+      console.warn('No data in Firebase');
+    }
+  }, (error) => {
+    console.error('Firebase listener error:', error);
+  });
+
+  // ============================================================
+  // INITIALIZE LUCIDE ICONS
+  // ============================================================
+  lucide.createIcons();
+
+  // ============================================================
+  // POLLING FALLBACK (in case realtime is slow)
+  // ============================================================
+  // Not needed; Firebase listener handles updates.
+  // We can also add a manual refresh button if desired, but spec didn't request.
+</script>
+</body>
+</html>
