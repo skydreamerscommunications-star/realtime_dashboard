@@ -20,40 +20,39 @@
   <style>
     /* ==========================================================================
        DESIGN TOKENS
-       One neutral ramp, one muted semantic ramp, one radius scale, one spacing
-       scale. Every value below is derived from these — no ad-hoc numbers.
        ========================================================================== */
     :root {
-      /* Neutrals — very slightly warm so the surface reads as paper, not screen */
-      --bg:              #f6f7f9;
+      /* Neutrals — cool, light, never pure black */
+      --bg:              #f5f7fb;
       --surface:         #ffffff;
-      --surface-alt:     #fafbfc;
-      --surface-sunken:  #f2f4f6;
-      --border:          #e6e8ec;   /* hairline, default */
-      --border-strong:   #d9dce2;   /* structural: table head, dividers */
-      --text:            #12151a;
-      --text-secondary:  #545c68;
-      --text-tertiary:   #868e9a;
+      --surface-alt:     #fbfcfe;
+      --surface-sunken:  #f1f4f9;
+      --border:          #e7ecf3;
+      --border-strong:   #dbe2ed;
+      --text:            #101828;
+      --text-secondary:  #4a5568;
+      --text-tertiary:   #8c96a8;
 
-      /* Semantic — same hues as before, desaturated for calm.
-         Each has a text tone, a soft fill, and an edge for hairline chips. */
-      --blue:            #2b5fd9;  --blue-tint:    #eff3fd;  --blue-edge:    #dae3fa;
-      --green:           #1a7a44;  --green-tint:   #ecf6f0;  --green-edge:   #d6e9de;
-      --emerald:         #0d7a5f;  --emerald-tint: #e9f5f2;  --emerald-edge: #d1e8e2;
-      --red:             #b4322c;  --red-tint:     #fceeed;  --red-edge:     #f6dcda;
-      --amber:           #96620f;  --amber-tint:   #fdf4e6;  --amber-edge:   #f2e3c8;
-      --gray:            #5b6470;  --gray-tint:    #f2f4f6;  --gray-edge:    #e4e7ec;
+      /* Semantic — saturated for icon tiles, soft tints for chips */
+      --blue:      #2563eb;  --blue-soft:      #eef4ff;  --blue-ink:      #1d4ed8;
+      --green:     #16a34a;  --green-soft:     #ecfdf3;  --green-ink:     #15803d;
+      --emerald:   #059669;  --emerald-soft:   #e6f8f2;  --emerald-ink:   #047857;
+      --red:       #dc2626;  --red-soft:       #fef2f2;  --red-ink:       #b91c1c;
+      --amber:     #f59e0b;  --amber-soft:     #fff8eb;  --amber-ink:     #b45309;
+      --slate:     #64748b;  --slate-soft:     #f1f4f9;  --slate-ink:     #475569;
 
-      /* Radius — three steps, used consistently. Nothing else appears anywhere. */
-      --r-sm: 6px;   /* chips, pills, small controls */
-      --r-md: 8px;   /* icon containers, segment control */
-      --r-lg: 10px;  /* cards */
+      /* Radius */
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-lg: 14px;
 
-      /* Spacing — 4px base, 8px rhythm */
-      --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;  --sp-4: 16px;  --sp-5: 20px;  --sp-6: 24px;
+      /* Spacing — 4px base */
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px;
 
-      /* Elevation — almost nothing. Hierarchy comes from spacing and hairlines. */
-      --shadow: 0 1px 2px rgba(18, 21, 26, 0.04);
+      /* Elevation */
+      --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+      --shadow:    0 1px 3px rgba(16, 24, 40, 0.05), 0 8px 20px -10px rgba(16, 24, 40, 0.10);
+      --shadow-lg: 0 2px 5px rgba(16, 24, 40, 0.06), 0 16px 32px -12px rgba(16, 24, 40, 0.16);
 
       --ease: cubic-bezier(0.2, 0, 0.13, 1);
     }
@@ -66,25 +65,19 @@
     canvas { display: block; }
     table { border-collapse: collapse; }
 
-    html, body { height: 100%; overflow: hidden; }
-
+    html { height: 100%; }
     body {
+      min-height: 100%;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: var(--sp-4) var(--sp-6);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
     }
 
     /* ==========================================================================
-       UTILITIES
-       These replace the runtime Tailwind CDN. Only the nine classes the markup
-       actually uses — defined faithfully, then overridden by component rules
-       with higher specificity where the design calls for different values.
+       UTILITIES — replaces the runtime Tailwind CDN
        ========================================================================== */
     .flex            { display: flex; }
     .items-center    { align-items: center; }
@@ -101,167 +94,219 @@
 
     /* ==========================================================================
        APPLICATION CANVAS
-       A contained, centred canvas rather than an edge-to-edge sprawl. The
-       max-width stops short of the viewport so the application reads as one
-       object sitting on a surface.
+       Compact and centred. The canvas stops well short of the viewport edge so
+       the application reads as one contained object rather than a full-bleed
+       admin page. The page scrolls — nothing is compressed to avoid it.
        ========================================================================== */
     .dashboard {
-      max-width: 1320px;
+      max-width: 1180px;
       width: 100%;
-      height: 100%;
-      max-height: 960px;
+      margin: 0 auto;
+      padding: 22px 24px 40px;
       display: flex;
       flex-direction: column;
-      gap: var(--sp-3);
-      margin: 0 auto;
+      gap: 18px;
     }
 
     /* ==========================================================================
        CARDS
-       Hairline border, near-zero elevation. Hover shifts the border, not the
-       shadow — a card that lifts on hover reads as a button, and none of these
-       are clickable.
        ========================================================================== */
     .card {
       background: var(--surface);
       border-radius: var(--r-lg);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      transition: border-color 0.16s var(--ease);
+      transition: box-shadow 0.22s var(--ease), transform 0.22s var(--ease), border-color 0.22s var(--ease);
     }
-    .card:hover { border-color: var(--border-strong); }
-    .dashboard .card { padding: var(--sp-4); }
-
-    /* Section header row inside every card */
-    .dashboard .card > div:first-child { margin-bottom: var(--sp-3); }
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .dashboard .card { padding: 18px; }
+    .dashboard .card > div:first-child { margin-bottom: 16px; }
 
     .section-title {
       display: flex;
       align-items: center;
       gap: var(--sp-2);
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 600;
-      letter-spacing: -0.006em;
+      letter-spacing: -0.012em;
       color: var(--text);
     }
     .section-icon {
-      width: 15px;
-      height: 15px;
-      stroke-width: 1.75;
+      width: 17px;
+      height: 17px;
+      stroke-width: 2;
       color: var(--text-tertiary);
       margin-right: 0;
       flex-shrink: 0;
     }
     .section-title span.text-xs {
-      font-size: 11px;
+      font-size: 12.5px;
       font-weight: 400;
-      letter-spacing: 0;
+      letter-spacing: -0.004em;
       color: var(--text-tertiary);
-      margin-left: 0;
+      margin-left: 2px;
     }
     #agent-count, #review-count {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
       color: var(--text-tertiary);
       font-variant-numeric: tabular-nums;
-      letter-spacing: 0;
+      background: var(--surface-sunken);
+      border-radius: 999px;
+      padding: 4px 11px;
     }
 
     /* ==========================================================================
-       HEADER — application chrome
-       Sits above a hairline rather than inside a card. Everything here is
-       quieter than the content below it, because chrome should never compete
-       with data.
+       HEADER
        ========================================================================== */
     .header {
-      height: 52px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
-      padding-bottom: var(--sp-3);
-      border-bottom: 1px solid var(--border);
+      gap: var(--sp-4);
     }
     .header-left {
       display: flex;
       align-items: center;
-      gap: var(--sp-3);
+      gap: 13px;
     }
 
-    /* Application mark: three ascending bars on a near-black tile. Monochrome
-       on purpose — the identity comes from proportion, not colour. */
+    /* Application mark — blue tile, white bars. Blue and white, no black. */
     .header-left .icon-box {
-      width: 28px;
-      height: 28px;
+      width: 40px;
+      height: 40px;
       border-radius: var(--r-md);
-      background: #12151a;
+      background: var(--blue);
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      box-shadow: 0 4px 12px -3px rgba(37, 99, 235, 0.5);
     }
-    .header-left .icon-box svg { width: 16px; height: 16px; display: block; }
+    .header-left .icon-box svg { width: 21px; height: 21px; display: block; }
 
     .header-left h1 {
-      font-size: 14px;
+      font-size: 19px;
       font-weight: 600;
-      letter-spacing: -0.012em;
-      line-height: 1.25;
+      letter-spacing: -0.022em;
+      line-height: 1.2;
       color: var(--text);
     }
     .header-left p {
-      font-size: 11px;
+      font-size: 12.5px;
       font-weight: 400;
-      line-height: 1.3;
+      line-height: 1.35;
       color: var(--text-tertiary);
-      margin-top: 1px;
+      margin-top: 2px;
     }
 
+    /* Status strip — the freshness of the feed is the first thing an operations
+       manager needs, so it gets its own surface rather than floating text. */
     .header-right {
       display: flex;
       align-items: center;
       gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      padding: 9px 16px;
+      flex-shrink: 0;
     }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: -0.006em;
+      color: var(--green-ink);
+      padding-right: 16px;
+      margin-right: 16px;
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .live-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--green);
+      opacity: 0.28;
+      animation: pulse 2.2s var(--ease) infinite;
+    }
+    @keyframes pulse {
+      0%   { transform: scale(0.6); opacity: 0.4; }
+      70%  { transform: scale(1.5); opacity: 0; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    /* Non-live states drop the pulse and take their own colour. */
+    .live-badge.state-break     { color: var(--amber-ink); }
+    .live-badge.state-break .live-dot { background: var(--amber); }
+    .live-badge.state-pre_shift { color: var(--blue-ink); }
+    .live-badge.state-pre_shift .live-dot { background: var(--blue); }
+    .live-badge.state-post_shift,
+    .live-badge.state-inactive  { color: var(--text-tertiary); }
+    .live-badge.state-post_shift .live-dot,
+    .live-badge.state-inactive .live-dot { background: var(--text-tertiary); }
+    .live-badge.state-post_shift .live-dot::after,
+    .live-badge.state-inactive .live-dot::after,
+    .live-badge.state-pre_shift .live-dot::after { animation: none; opacity: 0; }
+
     .header-meta {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
+      align-items: flex-start;
+      gap: 3px;
       line-height: 1;
     }
     .header-meta + .header-meta {
-      margin-left: var(--sp-4);
-      padding-left: var(--sp-4);
+      margin-left: 18px;
+      padding-left: 18px;
       border-left: 1px solid var(--border);
     }
     .header-meta .label {
-      font-size: 9.5px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+      font-size: 11.5px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: -0.004em;
       color: var(--text-tertiary);
+      white-space: nowrap;
     }
     .header-meta .value {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: -0.005em;
-      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.016em;
+      color: var(--text);
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     /* ==========================================================================
        KPI CARDS
-       The signature of this interface. Three tiers, deliberately far apart:
-         label   — 10px uppercase, tertiary        (recedes)
-         number  — 25px tight tabular              (dominates)
-         meta    — 11px secondary + hairline chip  (supports)
-       Density comes from tight vertical rhythm, not from shrinking the number.
+         [ icon tile ]  Title      (small, quiet)
+                        Number     (large, dominant)
+         ─────────────────────────────────────────
+         Rate  ......................  Status
        ========================================================================== */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: var(--sp-3);
+      gap: 14px;
       flex-shrink: 0;
     }
     .kpi-card {
@@ -269,123 +314,132 @@
       border-radius: var(--r-lg);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      padding: 11px 14px 12px;
+      padding: 17px 17px 15px;
       display: flex;
       flex-direction: column;
-      transition: border-color 0.16s var(--ease);
+      gap: 15px;
+      transition: box-shadow 0.22s var(--ease), transform 0.22s var(--ease), border-color 0.22s var(--ease);
     }
-    .kpi-card:hover { border-color: var(--border-strong); }
+    .kpi-card:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
 
     .kpi-top {
       display: flex;
       align-items: center;
-      gap: var(--sp-2);
-      height: 20px;
+      gap: 13px;
+      min-width: 0;
     }
+    /* Solid tile, white glyph, soft coloured cast underneath. Each metric owns
+       a colour so the row can be read by shape before it is read by number. */
     .kpi-icon-wrap {
-      width: 20px;
-      height: 20px;
-      border-radius: var(--r-sm);
+      width: 42px;
+      height: 42px;
+      border-radius: var(--r-md);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      background: var(--gray-tint);
-      color: var(--gray);
+      color: #ffffff;
+      background: var(--slate);
     }
     .kpi-icon-wrap .lucide {
-      width: 12px;
-      height: 12px;
-      stroke-width: 1.9;
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.1;
     }
-    /* Soft semantic tints, one per metric. Tints only — never a saturated fill. */
-    .kpi-grid > .kpi-card:nth-child(1) .kpi-icon-wrap { background: var(--blue-tint);    color: var(--blue); }
-    .kpi-grid > .kpi-card:nth-child(2) .kpi-icon-wrap { background: var(--green-tint);   color: var(--green); }
-    .kpi-grid > .kpi-card:nth-child(3) .kpi-icon-wrap { background: var(--emerald-tint); color: var(--emerald); }
-    .kpi-grid > .kpi-card:nth-child(4) .kpi-icon-wrap { background: var(--red-tint);     color: var(--red); }
-    .kpi-grid > .kpi-card:nth-child(5) .kpi-icon-wrap { background: var(--amber-tint);   color: var(--amber); }
+    .kpi-grid > .kpi-card:nth-child(1) .kpi-icon-wrap { background: var(--blue);    box-shadow: 0 5px 12px -4px rgba(37, 99, 235, 0.55); }
+    .kpi-grid > .kpi-card:nth-child(2) .kpi-icon-wrap { background: var(--green);   box-shadow: 0 5px 12px -4px rgba(22, 163, 74, 0.55); }
+    .kpi-grid > .kpi-card:nth-child(3) .kpi-icon-wrap { background: var(--emerald); box-shadow: 0 5px 12px -4px rgba(5, 150, 105, 0.55); }
+    .kpi-grid > .kpi-card:nth-child(4) .kpi-icon-wrap { background: var(--red);     box-shadow: 0 5px 12px -4px rgba(220, 38, 38, 0.50); }
+    .kpi-grid > .kpi-card:nth-child(5) .kpi-icon-wrap { background: var(--amber);   box-shadow: 0 5px 12px -4px rgba(245, 158, 11, 0.55); }
 
+    .kpi-head {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
     .kpi-label {
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.075em;
-      color: var(--text-tertiary);
+      font-size: 12.5px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: -0.006em;
+      color: var(--text-secondary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .kpi-number {
-      font-size: 25px;
-      font-weight: 600;
-      line-height: 1;
-      letter-spacing: -0.032em;
+      font-size: 27px;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
       font-variant-numeric: tabular-nums;
       color: var(--text);
-      margin-top: 7px;
     }
+
     .kpi-meta {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: var(--sp-2);
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-secondary);
-      margin-top: 7px;
-      min-height: 18px;
+      min-height: 22px;
     }
     .kpi-meta .metric {
       font-weight: 500;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.004em;
+      letter-spacing: -0.006em;
       white-space: nowrap;
+      color: var(--text-secondary);
     }
 
-    /* Status chip — hairline-bordered, sentence case, low height.
-       Reads as a state marker, not a badge. */
     .kpi-status {
-      font-size: 10px;
+      font-size: 11.5px;
       font-weight: 500;
-      line-height: 16px;
-      padding: 0 6px;
+      line-height: 22px;
+      padding: 0 10px;
       border-radius: var(--r-sm);
-      border: 1px solid transparent;
       text-transform: none;
-      letter-spacing: 0;
+      letter-spacing: -0.004em;
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .kpi-status.accelerating { color: var(--green); background: var(--green-tint); border-color: var(--green-edge); }
-    .kpi-status.slowing      { color: var(--red);   background: var(--red-tint);   border-color: var(--red-edge); }
-    .kpi-status.steady       { color: var(--gray);  background: var(--gray-tint);  border-color: var(--gray-edge); }
-    .kpi-status.empty        { color: var(--text-tertiary); background: transparent; border-color: var(--border); }
+    .kpi-status.accelerating { color: var(--green-ink); background: var(--green-soft); }
+    .kpi-status.slowing      { color: var(--red-ink);   background: var(--red-soft); }
+    .kpi-status.steady       { color: var(--slate-ink); background: var(--slate-soft); }
+    .kpi-status.empty        { color: var(--text-tertiary); background: var(--surface-sunken); }
 
     .kpi-progress {
       display: flex;
       align-items: center;
-      gap: var(--sp-2);
-      margin-top: 7px;
-      min-height: 18px;
+      gap: 10px;
+      min-height: 22px;
     }
     .kpi-progress-bar {
-      height: 4px;
-      border-radius: 2px;
+      height: 6px;
+      border-radius: 999px;
       background: var(--surface-sunken);
       flex: 1;
       overflow: hidden;
-      min-width: 24px;
+      min-width: 20px;
     }
     .kpi-progress-bar .fill {
       height: 100%;
-      border-radius: 2px;
+      border-radius: 999px;
       background: var(--emerald);
-      transition: width 0.4s var(--ease);
+      transition: width 0.5s var(--ease);
     }
     .kpi-progress-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.004em;
+      letter-spacing: -0.006em;
       white-space: nowrap;
     }
     #kpi-converted-remaining { color: var(--text-tertiary); font-weight: 400; }
@@ -394,59 +448,60 @@
        MAIN ROW
        ========================================================================== */
     .main-row {
-      flex: 1;
-      min-height: 0;
       display: flex;
-      gap: var(--sp-3);
+      gap: 18px;
+      align-items: stretch;
     }
     .left-col {
-      flex: 1.2;
+      flex: 1.25;
       display: flex;
       flex-direction: column;
-      gap: var(--sp-3);
-      min-height: 0;
+      gap: 18px;
+      min-width: 0;
+    }
+    .right-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
     }
     .left-col .chart-card,
     .left-col .reviews-card,
     .right-col .table-card {
-      flex: 1;
-      min-height: 0;
       display: flex;
       flex-direction: column;
     }
-    .right-col {
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
+    .left-col .reviews-card { min-height: 352px; }
+    .right-col .table-card  { flex: 1; min-height: 0; }
 
     /* ==========================================================================
        CHART
        ========================================================================== */
+    .chart-body {
+      position: relative;
+      height: 244px;
+      width: 100%;
+    }
     #trend-chart {
       width: 100% !important;
       height: 100% !important;
-      max-height: 100%;
     }
 
     /* ==========================================================================
-       SEGMENT CONTROL
-       Sunken track, raised active pill. Sentence case at a readable size —
-       9px uppercase is a badge, not a control.
+       SEGMENT CONTROL — blue marks the active selection
        ========================================================================== */
     .segment-group {
       display: inline-flex;
       background: var(--surface-sunken);
-      border-radius: var(--r-md);
+      border-radius: 10px;
       padding: 3px;
-      gap: 2px;
+      gap: 3px;
     }
     .segment-btn {
-      padding: 4px 11px;
-      font-size: 11px;
+      padding: 6px 14px;
+      font-size: 12.5px;
       font-weight: 500;
-      letter-spacing: -0.004em;
+      letter-spacing: -0.006em;
       text-transform: none;
       border: none;
       border-radius: var(--r-sm);
@@ -454,25 +509,25 @@
       color: var(--text-tertiary);
       cursor: pointer;
       line-height: 16px;
-      transition: background-color 0.16s var(--ease), color 0.16s var(--ease);
+      transition: background-color 0.18s var(--ease), color 0.18s var(--ease), box-shadow 0.18s var(--ease);
     }
     .segment-btn:hover:not(.active) {
       color: var(--text-secondary);
-      background: rgba(18, 21, 26, 0.035);
+      background: rgba(16, 24, 40, 0.04);
     }
     .segment-btn.active {
-      background: var(--surface);
-      color: var(--text);
+      background: var(--blue);
+      color: #ffffff;
       font-weight: 600;
-      box-shadow: 0 1px 2px rgba(18, 21, 26, 0.07);
+      box-shadow: 0 3px 8px -2px rgba(37, 99, 235, 0.45);
     }
     .segment-btn:focus-visible {
       outline: 2px solid var(--blue);
-      outline-offset: 1px;
+      outline-offset: 2px;
     }
 
     /* ==========================================================================
-       SCROLLBARS — present but nearly silent
+       SCROLLBARS
        ========================================================================== */
     .table-wrap, .reviews-feed {
       flex: 1;
@@ -480,112 +535,127 @@
       overflow-y: auto;
       overscroll-behavior: contain;
       scrollbar-width: thin;
-      scrollbar-color: #d3d7dd transparent;
+      scrollbar-color: #cdd5e0 transparent;
     }
     .table-wrap::-webkit-scrollbar,
-    .reviews-feed::-webkit-scrollbar { width: 6px; }
+    .reviews-feed::-webkit-scrollbar { width: 7px; }
     .table-wrap::-webkit-scrollbar-track,
     .reviews-feed::-webkit-scrollbar-track { background: transparent; }
     .table-wrap::-webkit-scrollbar-thumb,
-    .reviews-feed::-webkit-scrollbar-thumb {
-      background: #d3d7dd;
-      border-radius: 3px;
-    }
+    .reviews-feed::-webkit-scrollbar-thumb { background: #cdd5e0; border-radius: 4px; }
     .table-wrap:hover::-webkit-scrollbar-thumb,
-    .reviews-feed:hover::-webkit-scrollbar-thumb { background: #bcc2cb; }
+    .reviews-feed:hover::-webkit-scrollbar-thumb { background: #b3bdcc; }
 
     /* ==========================================================================
-       AGENT TABLE — the primary operational surface
-       The blue header is replaced with a sunken neutral band. A coloured header
-       competes with every value in the table; a quiet one lets the data lead.
-       Row separation is a barely-there stripe rather than a rule per row —
-       a dozen hairlines in a short table is noise, not structure.
+       AGENT TABLE
+       Rank badges come from a CSS counter, so the render logic is untouched.
+       Rank one takes the blue tint — the leaderboard should have a leader.
        ========================================================================== */
     .agent-table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      font-size: 12px;
+      font-size: 13px;
     }
     .agent-table thead th {
       position: sticky;
       top: 0;
       z-index: 2;
-      background: var(--surface-alt);
+      background: var(--surface);
       color: var(--text-tertiary);
-      font-weight: 600;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.075em;
-      padding: 8px 10px;
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: none;
+      letter-spacing: -0.004em;
+      padding: 0 10px 10px;
       text-align: left;
       white-space: nowrap;
       border-bottom: 1px solid var(--border-strong);
     }
-    .agent-table thead th:first-child { border-top-left-radius: var(--r-sm); }
-    .agent-table thead th:last-child  { border-top-right-radius: var(--r-sm); text-align: right; }
     .agent-table thead th:not(:first-child) { text-align: center; }
     .agent-table thead th:last-child { text-align: right; }
 
+    .agent-table tbody { counter-reset: rank; }
     .agent-table tbody td {
-      padding: 8px 10px;
-      border-bottom: none;
-      font-size: 12px;
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
       line-height: 1.35;
       color: var(--text-secondary);
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
-      transition: background-color 0.12s var(--ease);
+      transition: background-color 0.14s var(--ease);
     }
+    .agent-table tbody tr:last-child td { border-bottom: none; }
     .agent-table tbody td:not(:first-child) { text-align: center; }
     .agent-table tbody td:last-child {
       text-align: right;
       color: var(--text-tertiary);
-      font-size: 11px;
+      font-size: 12px;
     }
-    .agent-table tbody tr:nth-child(even) td { background: #fbfcfd; }
-    .agent-table tbody tr:hover td { background: var(--surface-sunken); }
+    .agent-table tbody tr:hover td { background: var(--surface-alt); }
+
     .agent-table .agent-name {
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 13px;
       color: var(--text);
-      letter-spacing: -0.005em;
+      letter-spacing: -0.01em;
     }
-    /* Transfers is the volume column and Qualified is the outcome column —
-       give them slightly more presence than the rest. */
-    .agent-table tbody td:nth-child(2),
-    .agent-table tbody td:nth-child(3) { color: var(--text); font-weight: 500; }
+    .agent-table .agent-name::before {
+      counter-increment: rank;
+      content: counter(rank);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 21px;
+      height: 21px;
+      margin-right: 11px;
+      border-radius: var(--r-sm);
+      background: var(--surface-sunken);
+      color: var(--text-tertiary);
+      font-size: 11px;
+      font-weight: 600;
+      vertical-align: middle;
+      font-variant-numeric: tabular-nums;
+    }
+    .agent-table tbody tr:first-child .agent-name::before {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+    /* Volume and the sorted metric carry more weight than the rest. */
+    .agent-table tbody td:nth-child(2) { color: var(--text); font-weight: 500; }
+    .agent-table tbody td:nth-child(3) { color: var(--text); font-weight: 600; }
 
     /* ==========================================================================
        REVIEWS FEED
-       Fixed columns so dispositions and outcomes line up and can be scanned
-       down the page. Borders removed: rhythm does the separating.
        ========================================================================== */
     .review-item {
       display: flex;
       align-items: center;
-      padding: 7px var(--sp-2);
+      padding: 10px var(--sp-2);
       margin: 0 calc(var(--sp-2) * -1);
-      border-bottom: none;
-      border-radius: var(--r-sm);
-      font-size: 12px;
-      gap: var(--sp-3);
-      transition: background-color 0.12s var(--ease);
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+      font-size: 13px;
+      gap: 12px;
+      transition: background-color 0.14s var(--ease);
     }
+    .review-item:last-child { border-bottom: none; }
     .review-item:hover { background: var(--surface-alt); }
     .review-time {
       color: var(--text-tertiary);
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
-      width: 46px;
+      width: 52px;
       flex-shrink: 0;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.004em;
+      letter-spacing: -0.006em;
     }
     .review-agent {
-      font-weight: 500;
-      font-size: 12px;
+      font-weight: 600;
+      font-size: 13px;
       color: var(--text);
-      letter-spacing: -0.005em;
+      letter-spacing: -0.01em;
       width: auto;
       flex: 1;
       min-width: 0;
@@ -593,104 +663,95 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .review-dispo   { flex-shrink: 0; width: 104px; }
-    .review-outcome { flex-shrink: 0; width: 112px; text-align: right; }
+    .review-dispo   { flex-shrink: 0; width: 112px; }
+    .review-outcome { flex-shrink: 0; width: 120px; text-align: right; }
 
     /* ==========================================================================
-       PILLS — one shape, one scale, used in the feed and the KPI row alike
+       PILLS
        ========================================================================== */
     .review-dispo .pill,
     .review-outcome .pill {
       display: inline-block;
-      padding: 0 7px;
+      padding: 0 10px;
       border-radius: var(--r-sm);
-      border: 1px solid transparent;
-      font-size: 10px;
+      font-size: 11.5px;
       font-weight: 500;
-      letter-spacing: 0;
-      line-height: 16px;
+      letter-spacing: -0.004em;
+      line-height: 22px;
       white-space: nowrap;
     }
-    .pill-qualified    { background: var(--green-tint);   color: var(--green);   border-color: var(--green-edge); }
-    .pill-notqualified { background: var(--red-tint);     color: var(--red);     border-color: var(--red-edge); }
-    .pill-pending      { background: var(--gray-tint);    color: var(--gray);    border-color: var(--gray-edge); }
-    .pill-converted    { background: var(--emerald-tint); color: var(--emerald); border-color: var(--emerald-edge); }
-    .pill-declined     { background: var(--amber-tint);   color: var(--amber);   border-color: var(--amber-edge); }
-    .pill-callback     { background: var(--amber-tint);   color: var(--amber);   border-color: var(--amber-edge); }
-    .pill-notconverted { background: transparent;         color: var(--text-tertiary); border-color: var(--border); }
+    .pill-qualified    { background: var(--green-soft);   color: var(--green-ink); }
+    .pill-notqualified { background: var(--red-soft);     color: var(--red-ink); }
+    .pill-pending      { background: var(--slate-soft);   color: var(--slate-ink); }
+    .pill-converted    { background: var(--emerald-soft); color: var(--emerald-ink); }
+    .pill-declined     { background: var(--amber-soft);   color: var(--amber-ink); }
+    .pill-callback     { background: var(--amber-soft);   color: var(--amber-ink); }
+    .pill-notconverted { background: var(--surface-sunken); color: var(--text-tertiary); }
 
     /* ==========================================================================
        EMPTY STATES
-       An empty screen should say what will appear and when, not just report an
-       absence. The supporting line is set in CSS so the render logic stays
-       untouched.
        ========================================================================== */
     .empty-state {
       color: var(--text-secondary);
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: -0.005em;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
       text-align: center;
-      padding: 32px 16px;
+      padding: 44px 16px;
     }
     .empty-state::before {
       content: '';
       display: block;
-      width: 22px;
-      height: 22px;
-      margin: 0 auto 10px;
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 14px;
+      border-radius: var(--r-md);
+      background-color: var(--surface-sunken);
       background-repeat: no-repeat;
       background-position: center;
-      background-size: contain;
-      opacity: 0.55;
+      background-size: 21px 21px;
     }
     .empty-state::after {
       display: block;
-      margin-top: 3px;
-      font-size: 11px;
+      margin-top: 5px;
+      font-size: 12.5px;
       font-weight: 400;
       color: var(--text-tertiary);
-      letter-spacing: 0;
+      letter-spacing: -0.004em;
     }
     #agent-tbody .empty-state::before {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23868e9a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c96a8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
     }
     #agent-tbody .empty-state::after { content: 'Agent activity appears as transfers are logged.'; }
     #reviews-container .empty-state::before {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23868e9a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-6l-2 3h-4l-2-3H2'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238c96a8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 12h-6l-2 3h-4l-2-3H2'/%3E%3Cpath d='M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/%3E%3C/svg%3E");
     }
     #reviews-container .empty-state::after { content: 'Reviews appear here once a transfer is dispositioned.'; }
 
     .agent-table tbody td.empty-state {
       text-align: center;
       white-space: normal;
-      color: var(--text-secondary);
-      font-size: 12px;
+      border-bottom: none;
       background: transparent;
     }
     .agent-table tbody tr:has(td.empty-state):hover td { background: transparent; }
 
     /* ==========================================================================
-       SHORT VIEWPORTS
-       On a 768px display the fixed-height layout has roughly 600px to work
-       with. Compress the KPI rhythm rather than letting the chart collapse.
+       NARROW SCREENS
        ========================================================================== */
-    @media (max-height: 800px) {
-      body { padding: var(--sp-3) var(--sp-5); }
-      .dashboard { gap: 10px; }
-      .kpi-grid { gap: 10px; }
-      .main-row, .left-col { gap: 10px; }
-      .dashboard .card { padding: 13px 14px; }
-      .dashboard .card > div:first-child { margin-bottom: 10px; }
-      .kpi-card { padding: 9px 13px 10px; }
-      .kpi-number { font-size: 22px; margin-top: 5px; }
-      .kpi-meta, .kpi-progress { margin-top: 5px; }
-      .header { height: 46px; padding-bottom: 10px; }
-      .empty-state { padding: 22px 16px; }
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+      .main-row { flex-direction: column; }
+      .right-col .table-card { min-height: 420px; }
+    }
+    @media (max-width: 720px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .header { flex-direction: column; align-items: flex-start; }
+      .dashboard { padding: 16px 16px 32px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      *, .live-dot::after { transition-duration: 0.01ms !important; animation: none !important; }
     }
   </style>
 </head>
@@ -704,19 +765,22 @@
       <div class="header-left">
         <div class="icon-box" aria-hidden="true">
           <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <rect x="3.5" y="13.5" width="3.4" height="6.5" rx="1.3" fill="currentColor" opacity="0.42"/>
-            <rect x="10.3" y="9" width="3.4" height="11" rx="1.3" fill="currentColor" opacity="0.7"/>
-            <rect x="17.1" y="4" width="3.4" height="16" rx="1.3" fill="currentColor"/>
+            <rect x="3.4" y="13.4" width="3.6" height="6.6" rx="1.4" fill="currentColor" opacity="0.5"/>
+            <rect x="10.2" y="8.6" width="3.6" height="11.4" rx="1.4" fill="currentColor" opacity="0.75"/>
+            <rect x="17" y="4" width="3.6" height="16" rx="1.4" fill="currentColor"/>
           </svg>
         </div>
         <div>
           <h1>Realtime Dashboard</h1>
-          <p>Live Operations Overview</p>
+          <p>Live operations overview</p>
         </div>
       </div>
       <div class="header-right">
+        <div class="live-badge" id="state-badge">
+          <span class="live-dot"></span><span id="state-label">Live</span>
+        </div>
         <div class="header-meta">
-          <span class="label">Last Activity</span>
+          <span class="label">Last activity</span>
           <span class="value" id="lastActivity">—</span>
         </div>
         <div class="header-meta">
@@ -734,9 +798,11 @@
       <div class="kpi-card">
         <div class="kpi-top">
           <div class="kpi-icon-wrap"><i data-lucide="arrow-left-right"></i></div>
-          <span class="kpi-label">Transfers</span>
+          <div class="kpi-head">
+            <span class="kpi-label">Transfers</span>
+            <div class="kpi-number" id="kpi-transfers-value">0</div>
+          </div>
         </div>
-        <div class="kpi-number" id="kpi-transfers-value">0</div>
         <div class="kpi-meta">
           <span class="metric" id="kpi-transfers-rate">FPH 0.0</span>
           <span class="kpi-status empty" id="kpi-transfers-status">—</span>
@@ -747,9 +813,11 @@
       <div class="kpi-card">
         <div class="kpi-top">
           <div class="kpi-icon-wrap"><i data-lucide="check-circle"></i></div>
-          <span class="kpi-label">Qualified</span>
+          <div class="kpi-head">
+            <span class="kpi-label">Qualified</span>
+            <div class="kpi-number" id="kpi-qualified-value">0</div>
+          </div>
         </div>
-        <div class="kpi-number" id="kpi-qualified-value">0</div>
         <div class="kpi-meta">
           <span class="metric" id="kpi-qualified-rate">QPH 0.0</span>
           <span class="kpi-status empty" id="kpi-qualified-status">—</span>
@@ -760,9 +828,11 @@
       <div class="kpi-card">
         <div class="kpi-top">
           <div class="kpi-icon-wrap"><i data-lucide="trending-up"></i></div>
-          <span class="kpi-label">Converted</span>
+          <div class="kpi-head">
+            <span class="kpi-label">Converted</span>
+            <div class="kpi-number" id="kpi-converted-value">0</div>
+          </div>
         </div>
-        <div class="kpi-number" id="kpi-converted-value">0</div>
         <div class="kpi-progress">
           <span class="kpi-progress-label" id="kpi-converted-progress">Goal 0%</span>
           <div class="kpi-progress-bar"><div class="fill" id="kpi-converted-bar" style="width:0%;"></div></div>
@@ -774,9 +844,11 @@
       <div class="kpi-card">
         <div class="kpi-top">
           <div class="kpi-icon-wrap"><i data-lucide="x-circle"></i></div>
-          <span class="kpi-label">Not Qualified</span>
+          <div class="kpi-head">
+            <span class="kpi-label">Not Qualified</span>
+            <div class="kpi-number" id="kpi-notqualified-value">0</div>
+          </div>
         </div>
-        <div class="kpi-number" id="kpi-notqualified-value">0</div>
         <div class="kpi-meta">
           <span class="metric" id="kpi-notqualified-rate">DNQ 0.0%</span>
         </div>
@@ -786,9 +858,11 @@
       <div class="kpi-card">
         <div class="kpi-top">
           <div class="kpi-icon-wrap"><i data-lucide="phone-call"></i></div>
-          <span class="kpi-label">Call Back</span>
+          <div class="kpi-head">
+            <span class="kpi-label">Call Back</span>
+            <div class="kpi-number" id="kpi-callback-value">0</div>
+          </div>
         </div>
-        <div class="kpi-number" id="kpi-callback-value">0</div>
         <div class="kpi-meta">
           <span class="metric" id="kpi-callback-rate">Scheduled</span>
         </div>
@@ -807,14 +881,14 @@
             <div class="section-title">
               <i data-lucide="line-chart" class="section-icon"></i>
               <span>Hourly Performance</span>
-              <span class="text-xs text-secondary ml-1 font-normal">Current Shift</span>
+              <span class="text-xs text-secondary ml-1 font-normal">Current shift</span>
             </div>
             <div class="segment-group">
               <button class="segment-btn active" data-metric="transfers">Transfers</button>
               <button class="segment-btn" data-metric="qualified">Qualified</button>
             </div>
           </div>
-          <div class="flex-1 min-h-0" style="position:relative;">
+          <div class="chart-body">
             <canvas id="trend-chart"></canvas>
           </div>
         </div>
@@ -852,8 +926,8 @@
                   <th>Transfers</th>
                   <th>Qualified</th>
                   <th>Converted</th>
-                  <th>DNQ</th>
-                  <th style="text-align:right;">Last Activity</th>
+                  <th>Not Qualified</th>
+                  <th style="text-align:right;">Last activity</th>
                 </tr>
               </thead>
               <tbody id="agent-tbody">
@@ -888,6 +962,8 @@
 
     const lastActivityEl = $('lastActivity');
     const updatedAtEl = $('updatedAt');
+    const stateBadgeEl = $('state-badge');
+    const stateLabelEl = $('state-label');
 
     const kpi = {
       transfers: { value: $('kpi-transfers-value'), rate: $('kpi-transfers-rate'), status: $('kpi-transfers-status') },
@@ -912,12 +988,21 @@
 
     // ──────────────────────────────────────────────────────────────
     // CHART PRESENTATION TOKENS
-    // Mirrors the CSS token scale so the chart reads as part of the same
-    // system rather than as an embedded third-party widget.
+    // Mirrors the CSS scale so the chart reads as part of the same system
+    // rather than as an embedded third-party widget.
     // ──────────────────────────────────────────────────────────────
     const CHART_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    const CHART_TICK = '#868e9a';
-    const CHART_GRID = '#eef0f3';
+    const CHART_TICK = '#8c96a8';
+    const CHART_GRID = '#eef1f6';
+
+    // Backend shift states -> human labels for the header badge.
+    const STATE_LABELS = {
+      LIVE: 'Live',
+      BREAK: 'On break',
+      PRE_SHIFT: 'Before shift',
+      POST_SHIFT: 'Shift ended',
+      INACTIVE: 'No activity'
+    };
 
     // ──────────────────────────────────────────────────────────────
     // HELPERS
@@ -990,6 +1075,12 @@
       if (!meta) return;
       lastActivityEl.textContent = timeAgo(meta.lastActivityTimestamp);
       updatedAtEl.textContent = timeAgo(meta.generatedTimestamp);
+
+      // Header badge reflects the backend's own shift state. Falls back to
+      // "Live" if the payload predates meta.state.
+      const state = String(meta.state || 'LIVE').toUpperCase();
+      stateLabelEl.textContent = STATE_LABELS[state] || 'Live';
+      stateBadgeEl.className = 'live-badge state-' + state.toLowerCase();
     }
 
     function renderSummary(summary) {
@@ -1093,8 +1184,8 @@
 
       const metric = currentMetric;
       const datasetMap = {
-        transfers: { data: trend.transfers || [], label: 'Transfers', color: '#2b5fd9', fill: 'rgba(43, 95, 217, 0.07)' },
-        qualified: { data: trend.qualified || [], label: 'Qualified', color: '#1a7a44', fill: 'rgba(26, 122, 68, 0.07)' }
+        transfers: { data: trend.transfers || [], label: 'Transfers', color: '#2563eb', rgb: '37, 99, 235' },
+        qualified: { data: trend.qualified || [], label: 'Qualified', color: '#16a34a', rgb: '22, 163, 74' }
       };
       const ds = datasetMap[metric] || datasetMap.transfers;
       const points = ds.data || [];
@@ -1102,6 +1193,13 @@
       const values = points.map(p => p.value || 0);
 
       const ctx = chartCanvas.getContext('2d');
+
+      // Vertical gradient under the line — the area gives the series weight
+      // without the line itself having to get heavier.
+      const plotHeight = (chartCanvas.parentElement && chartCanvas.parentElement.clientHeight) || 244;
+      const gradient = ctx.createLinearGradient(0, 0, 0, plotHeight);
+      gradient.addColorStop(0, 'rgba(' + ds.rgb + ', 0.20)');
+      gradient.addColorStop(1, 'rgba(' + ds.rgb + ', 0.00)');
 
       if (chartInstance) {
         chartInstance.destroy();
@@ -1116,39 +1214,41 @@
             label: ds.label,
             data: values,
             borderColor: ds.color,
-            backgroundColor: ds.fill,
+            backgroundColor: gradient,
             fill: true,
-            tension: 0.32,
-            borderWidth: 1.75,
+            tension: 0.35,
+            borderWidth: 2,
             borderCapStyle: 'round',
             borderJoinStyle: 'round',
-            // Points stay hidden until hover — a line with eleven dots on it
-            // reads as a chart demo, not an instrument.
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            pointBackgroundColor: ds.color,
+            pointRadius: 3,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: ds.color,
+            pointBorderWidth: 1.8,
+            pointHoverRadius: 5.5,
             pointHoverBackgroundColor: ds.color,
             pointHoverBorderColor: '#ffffff',
-            pointHoverBorderWidth: 2,
+            pointHoverBorderWidth: 2.5,
             pointHitRadius: 16
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          layout: { padding: { top: 8, right: 2, bottom: 0, left: 0 } },
+          layout: { padding: { top: 10, right: 4, bottom: 0, left: 0 } },
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: '#12151a',
-              titleColor: '#ffffff',
-              titleFont: { family: CHART_FONT, size: 11, weight: '600' },
-              bodyColor: 'rgba(255, 255, 255, 0.72)',
-              bodyFont: { family: CHART_FONT, size: 11, weight: '500' },
-              padding: { top: 8, right: 10, bottom: 8, left: 10 },
-              cornerRadius: 6,
+              backgroundColor: '#ffffff',
+              titleColor: '#101828',
+              titleFont: { family: CHART_FONT, size: 13, weight: '700' },
+              bodyColor: '#8c96a8',
+              bodyFont: { family: CHART_FONT, size: 12, weight: '500' },
+              borderColor: '#e7ecf3',
+              borderWidth: 1,
+              padding: { top: 9, right: 12, bottom: 9, left: 12 },
+              cornerRadius: 10,
               displayColors: false,
-              caretSize: 5,
+              caretSize: 6,
               caretPadding: 8,
               callbacks: {
                 label: function(context) {
@@ -1159,12 +1259,10 @@
           },
           scales: {
             x: {
-              // Vertical rules add nothing to an hourly series — the labels
-              // already mark the intervals.
               border: { display: false },
               grid: { display: false, drawTicks: false },
               ticks: {
-                font: { family: CHART_FONT, size: 10, weight: '500' },
+                font: { family: CHART_FONT, size: 11, weight: '500' },
                 color: CHART_TICK,
                 padding: 8,
                 maxTicksLimit: 16,
@@ -1174,9 +1272,9 @@
             y: {
               beginAtZero: true,
               border: { display: false },
-              grid: { color: CHART_GRID, drawTicks: false, lineWidth: 1 },
+              grid: { color: CHART_GRID, drawTicks: false, lineWidth: 1, borderDash: [4, 4] },
               ticks: {
-                font: { family: CHART_FONT, size: 10, weight: '500' },
+                font: { family: CHART_FONT, size: 11, weight: '500' },
                 color: CHART_TICK,
                 padding: 10,
                 stepSize: Math.ceil(Math.max(1, Math.max(...values) / 5))
