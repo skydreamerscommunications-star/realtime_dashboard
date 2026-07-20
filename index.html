@@ -1,667 +1,999 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Realtime Operations Dashboard</title>
+!DOCTYPE html
+html lang=en
+head
+  meta charset=UTF-8 
+  meta name=viewport content=width=device-width, initial-scale=1.0 
+  titleRealtime Operations Dashboardtitle
 
-  <!-- TailwindCSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Font: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- Firebase SDK (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  !-- TailwindCSS via CDN --
+  script src=httpscdn.tailwindcss.com
+  script
+  !-- Google Font Inter --
+  link rel=preconnect href=httpsfonts.googleapis.com 
+  link rel=preconnect href=httpsfonts.gstatic.com crossorigin 
+  link href=httpsfonts.googleapis.comcss2family=Interopsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap rel=stylesheet 
+  !-- Lucide Icons --
+  script src=httpsunpkg.comlucide@latest
+  script
+  !-- Chart.js --
+  script src=httpscdn.jsdelivr.netnpmchart.js@4.4.1distchart.umd.min.js
+  script
+  !-- Firebase SDK (compat) --
+  script src=httpswww.gstatic.comfirebasejs9.23.0firebase-app-compat.js
+  script
+  script src=httpswww.gstatic.comfirebasejs9.23.0firebase-database-compat.js
+  script
 
-  <style>
-    /* Custom CSS – design tokens and overrides */
-    :root {
-      --primary: #2563eb;     /* blue-600 */
-      --success: #16a34a;     /* green-600 */
-      --emerald: #059669;     /* emerald-600 */
-      --danger: #dc2626;      /* red-600 */
-      --warning: #d97706;     /* amber-600 */
-      --muted: #6b7280;       /* gray-500 */
-      --border: #e5e7eb;      /* gray-200 */
-      --surface: #ffffff;
-      --background: #f8fafc;  /* slate-50 */
-      --text: #0f172a;        /* slate-900 */
-      --text-secondary: #475569; /* slate-600 */
+  style
+     ── Design Tokens ── 
+    root {
+      --blue #2563eb;
+      --green #16a34a;
+      --emerald #059669;
+      --red #dc2626;
+      --amber #d97706;
+      --gray #6b7280;
+      --gray-light #f1f5f9;
+      --border #e5e7eb;
+      --surface #ffffff;
+      --bg #f8fafc;
+      --text #0f172a;
+      --text-secondary #475569;
+      --radius 10px;
+      --shadow 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-hover 0 4px 16px rgba(0, 0, 0, 0.06);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+     {
+      box-sizing border-box;
+      margin 0;
+      padding 0;
+    }
+
+    html,
+    body {
+      height 100%;
+      overflow hidden;
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--background);
-      color: var(--text);
-      padding: 24px 32px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      font-family 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background var(--bg);
+      color var(--text);
+      display flex;
+      align-items center;
+      justify-content center;
+      padding 20px 24px;
+      -webkit-font-smoothing antialiased;
+      -moz-osx-font-smoothing grayscale;
     }
 
-    /* Main container – no scroll */
-    .dashboard-container {
-      max-width: 1440px;
-      width: 100%;
-      margin: 0 auto;
+     ── Main Container ── 
+    .dashboard {
+      max-width 1450px;
+      width 100%;
+      height 100%;
+      max-height 960px;
+      display flex;
+      flex-direction column;
+      gap 16px;
+      margin 0 auto;
+      padding 0;
     }
 
-    /* Cards */
+     ── Cards ── 
     .card {
-      background: var(--surface);
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-      border: 1px solid var(--border);
-      transition: box-shadow 0.15s ease;
+      background var(--surface);
+      border-radius var(--radius);
+      border 1px solid var(--border);
+      box-shadow var(--shadow);
+      transition box-shadow 0.15s ease;
     }
-    .card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    .cardhover {
+      box-shadow var(--shadow-hover);
     }
 
-    /* KPI cards */
-    .kpi-icon {
-      width: 20px;
-      height: 20px;
-      stroke-width: 1.75;
+     ── KPI Cards ── 
+    .kpi-icon-wrap {
+      width 36px;
+      height 36px;
+      border-radius 8px;
+      display flex;
+      align-items center;
+      justify-content center;
+      flex-shrink 0;
+    }
+    .kpi-icon-wrap .lucide {
+      width 18px;
+      height 18px;
+      stroke-width 1.75;
     }
     .kpi-value {
-      font-size: 28px;
-      font-weight: 600;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
+      font-size 32px;
+      font-weight 600;
+      line-height 1.1;
+      letter-spacing -0.02em;
     }
     .kpi-label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      letter-spacing: 0.01em;
+      font-size 12px;
+      font-weight 500;
+      color var(--text-secondary);
+      letter-spacing 0.01em;
+      text-transform uppercase;
     }
     .kpi-sub {
-      font-size: 13px;
-      color: var(--text-secondary);
-      font-weight: 400;
+      font-size 13px;
+      color var(--text-secondary);
+      font-weight 400;
     }
     .kpi-status {
-      font-size: 12px;
-      font-weight: 500;
-      padding: 2px 8px;
-      border-radius: 12px;
-      background: #f1f5f9;
+      font-size 11px;
+      font-weight 600;
+      padding 2px 8px;
+      border-radius 12px;
+      text-transform uppercase;
+      letter-spacing 0.02em;
     }
-    .kpi-status.accelerating { color: #16a34a; background: #dcfce7; }
-    .kpi-status.slowing { color: #dc2626; background: #fee2e2; }
-    .kpi-status.steady { color: #6b7280; background: #f3f4f6; }
-
-    /* Chart container */
-    #trend-chart {
-      width: 100% !important;
-      height: 100% !important;
-      max-height: 220px;
+    .kpi-status.accelerating {
+      color var(--green);
+      background #dcfce7;
     }
-
-    /* Table */
-    .agent-table th {
-      font-weight: 500;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      color: var(--text-secondary);
-      background: #f1f5f9;
-      padding: 8px 12px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
+    .kpi-status.slowing {
+      color var(--red);
+      background #fee2e2;
     }
-    .agent-table td {
-      padding: 8px 12px;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
+    .kpi-status.steady {
+      color var(--gray);
+      background var(--gray-light);
     }
-    .agent-table tbody tr:nth-child(even) {
-      background: #fafbfc;
-    }
-    .agent-table tbody tr:hover {
-      background: #f1f5f9;
+    .kpi-status.empty {
+      color var(--gray);
+      background var(--gray-light);
     }
 
-    /* Reviews */
-    .review-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      font-size: 13px;
-      border-bottom: 1px solid var(--border);
+    .kpi-progress-bar {
+      height 3px;
+      border-radius 4px;
+      background var(--gray-light);
+      overflow hidden;
+      margin-top 4px;
     }
-    .review-row:last-child {
-      border-bottom: none;
-    }
-    .review-time {
-      color: var(--text-secondary);
-      width: 70px;
-      flex-shrink: 0;
-    }
-    .review-agent {
-      font-weight: 500;
-      width: 80px;
-      flex-shrink: 0;
-    }
-    .review-dispo, .review-outcome {
-      width: 80px;
-      flex-shrink: 0;
-      text-align: right;
+    .kpi-progress-bar .fill {
+      height 100%;
+      border-radius 4px;
+      background var(--emerald);
+      transition width 0.4s ease;
     }
 
-    /* Status badge */
+     ── Status Badge ── 
     .status-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.01em;
+      display inline-flex;
+      align-items center;
+      padding 3px 14px;
+      border-radius 20px;
+      font-size 12px;
+      font-weight 600;
+      letter-spacing 0.01em;
+      text-transform uppercase;
+      background var(--gray-light);
+      color var(--gray);
     }
     .status-badge.live {
-      background: #dcfce7;
-      color: #16a34a;
+      background #dcfce7;
+      color var(--green);
     }
     .status-badge.break {
-      background: #fef3c7;
-      color: #d97706;
+      background #fef3c7;
+      color var(--amber);
     }
-    .status-badge.pre_shift, .status-badge.post_shift, .status-badge.inactive {
-      background: #f3f4f6;
-      color: #6b7280;
-    }
-
-    /* Header right items */
-    .header-meta {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-    .header-meta strong {
-      color: var(--text);
-      font-weight: 500;
-    }
-    .header-meta .time {
-      font-weight: 500;
-      color: var(--text);
+    .status-badge.pre_shift,
+    .status-badge.post_shift,
+    .status-badge.inactive {
+      background var(--gray-light);
+      color var(--gray);
     }
 
-    /* Pulse animation for LIVE */
     @keyframes soft-pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
+      0%,
+      100% {
+        opacity 1;
+      }
+      50% {
+        opacity 0.55;
+      }
     }
     .status-badge.live.pulse {
-      animation: soft-pulse 2s ease-in-out infinite;
+      animation soft-pulse 2.2s ease-in-out infinite;
     }
 
-    /* Responsive tweaks: reduce padding on smaller screens but still no scroll */
-    @media (max-width: 1280px) {
-      body { padding: 16px 20px; }
-      .kpi-value { font-size: 24px; }
+     ── Header Meta ── 
+    .meta-block {
+      display flex;
+      flex-direction column;
+      align-items flex-end;
+      line-height 1.3;
     }
-    @media (max-width: 1024px) {
-      .kpi-value { font-size: 20px; }
-      .kpi-label { font-size: 12px; }
-      .agent-table td, .agent-table th { font-size: 12px; padding: 6px 8px; }
-      .review-row { font-size: 12px; }
+    .meta-block .label {
+      font-size 10px;
+      font-weight 500;
+      text-transform uppercase;
+      letter-spacing 0.04em;
+      color var(--text-secondary);
     }
-  </style>
-</head>
-<body>
-<div class="dashboard-container" id="app">
-
-  <!-- ===== HEADER ===== -->
-  <header class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-semibold tracking-tight">Realtime Dashboard</h1>
-    <div class="flex items-center gap-6">
-      <div class="header-meta">
-        <span class="text-muted-foreground">Last Activity</span>
-        <span class="time" id="lastActivity">—</span>
-      </div>
-      <div class="header-meta">
-        <span class="text-muted-foreground">Updated</span>
-        <span class="time" id="updatedAt">—</span>
-      </div>
-      <div id="statusBadge" class="status-badge">—</div>
-    </div>
-  </header>
-
-  <!-- ===== KPI CARDS ===== -->
-  <section class="grid grid-cols-5 gap-4 mb-6">
-    <!-- Transfers -->
-    <div class="card p-4 flex flex-col">
-      <div class="flex items-center gap-2 mb-1">
-        <i data-lucide="file-text" class="kpi-icon text-blue-600"></i>
-        <span class="kpi-label">Transfers</span>
-      </div>
-      <div class="kpi-value" id="kpi-transfers-value">0</div>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="kpi-sub" id="kpi-transfers-rate">FPH 0.0</span>
-        <span class="kpi-status" id="kpi-transfers-status">—</span>
-      </div>
-    </div>
-    <!-- Qualified -->
-    <div class="card p-4 flex flex-col">
-      <div class="flex items-center gap-2 mb-1">
-        <i data-lucide="check-circle" class="kpi-icon text-green-600"></i>
-        <span class="kpi-label">Qualified</span>
-      </div>
-      <div class="kpi-value" id="kpi-qualified-value">0</div>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="kpi-sub" id="kpi-qualified-rate">QPH 0.0</span>
-        <span class="kpi-status" id="kpi-qualified-status">—</span>
-      </div>
-    </div>
-    <!-- Converted -->
-    <div class="card p-4 flex flex-col">
-      <div class="flex items-center gap-2 mb-1">
-        <i data-lucide="trending-up" class="kpi-icon text-emerald-600"></i>
-        <span class="kpi-label">Converted</span>
-      </div>
-      <div class="kpi-value" id="kpi-converted-value">0</div>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="kpi-sub" id="kpi-converted-progress">Goal 0%</span>
-      </div>
-    </div>
-    <!-- Not Qualified -->
-    <div class="card p-4 flex flex-col">
-      <div class="flex items-center gap-2 mb-1">
-        <i data-lucide="x-circle" class="kpi-icon text-red-600"></i>
-        <span class="kpi-label">Not Qualified</span>
-      </div>
-      <div class="kpi-value" id="kpi-notqualified-value">0</div>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="kpi-sub" id="kpi-notqualified-rate">DNQ 0.0%</span>
-      </div>
-    </div>
-    <!-- Declined -->
-    <div class="card p-4 flex flex-col">
-      <div class="flex items-center gap-2 mb-1">
-        <i data-lucide="alert-circle" class="kpi-icon text-amber-600"></i>
-        <span class="kpi-label">Declined</span>
-      </div>
-      <div class="kpi-value" id="kpi-declined-value">0</div>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="kpi-sub" id="kpi-declined-rate">Drop 0.0%</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== CHART + REVIEWS ROW ===== -->
-  <section class="grid grid-cols-3 gap-6 mb-6">
-    <!-- Chart (65%) -->
-    <div class="card col-span-2 p-4">
-      <div class="flex items-center justify-between mb-3">
-        <span class="font-medium text-sm text-secondary">Hourly Trend</span>
-        <div class="flex items-center gap-3 text-xs text-secondary">
-          <span><span class="inline-block w-2 h-2 rounded-full bg-blue-600 mr-1"></span>Transfers</span>
-          <span><span class="inline-block w-2 h-2 rounded-full bg-green-600 mr-1"></span>Qualified</span>
-          <span><span class="inline-block w-2 h-2 rounded-full bg-emerald-600 mr-1"></span>Converted</span>
-        </div>
-      </div>
-      <div style="position: relative; height: 200px;">
-        <canvas id="trend-chart"></canvas>
-      </div>
-    </div>
-
-    <!-- Latest Reviews (35%) -->
-    <div class="card col-span-1 p-4 flex flex-col">
-      <div class="flex items-center justify-between mb-3">
-        <span class="font-medium text-sm text-secondary">Latest Reviews</span>
-        <span class="text-xs text-secondary" id="review-count">0</span>
-      </div>
-      <div class="flex-1 overflow-hidden">
-        <div id="reviews-container" class="space-y-1">
-          <!-- rows inserted by JS -->
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== AGENT LEADERBOARD ===== -->
-  <section class="card p-4">
-    <div class="flex items-center justify-between mb-3">
-      <span class="font-medium text-sm text-secondary">Agent Performance</span>
-      <span class="text-xs text-secondary" id="agent-count">0 agents</span>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="agent-table w-full">
-        <thead>
-          <tr>
-            <th>Agent</th>
-            <th class="text-center">Transfers</th>
-            <th class="text-center">Qualified</th>
-            <th class="text-center">Converted</th>
-            <th class="text-center">DNQ</th>
-            <th class="text-right">Last Activity</th>
-          </tr>
-        </thead>
-        <tbody id="agent-tbody">
-          <!-- rows inserted by JS -->
-        </tbody>
-      </table>
-    </div>
-  </section>
-</div>
-
-<script>
-  // ============================================================
-  // FIREBASE CONFIG
-  // ============================================================
-  const firebaseConfig = {
-    databaseURL: "https://performance-dashboard-c7017-default-rtdb.firebaseio.com/"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const dbRef = db.ref('transfers_dashboard');
-
-  // ============================================================
-  // DOM REFERENCES
-  // ============================================================
-  const $ = id => document.getElementById(id);
-  const lastActivityEl = $('lastActivity');
-  const updatedAtEl = $('updatedAt');
-  const statusBadge = $('statusBadge');
-
-  const kpi = {
-    transfers: { value: $('kpi-transfers-value'), rate: $('kpi-transfers-rate'), status: $('kpi-transfers-status') },
-    qualified: { value: $('kpi-qualified-value'), rate: $('kpi-qualified-rate'), status: $('kpi-qualified-status') },
-    converted: { value: $('kpi-converted-value'), progress: $('kpi-converted-progress') },
-    notQualified: { value: $('kpi-notqualified-value'), rate: $('kpi-notqualified-rate') },
-    declined: { value: $('kpi-declined-value'), rate: $('kpi-declined-rate') }
-  };
-  const reviewsContainer = $('reviews-container');
-  const reviewCount = $('review-count');
-  const agentTbody = $('agent-tbody');
-  const agentCount = $('agent-count');
-
-  let chartInstance = null;
-  let currentData = null;
-
-  // ============================================================
-  // HELPERS
-  // ============================================================
-  function timeAgo(isoString) {
-    if (!isoString) return '—';
-    const now = Date.now();
-    const then = new Date(isoString).getTime();
-    const diff = Math.max(0, now - then);
-    const seconds = Math.floor(diff / 1000);
-    if (seconds < 60) return seconds + 's ago';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return minutes + 'm ago';
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + 'h ago';
-    return new Date(isoString).toLocaleString();
-  }
-
-  function formatNumber(n) {
-    if (n === undefined || n === null) return '0';
-    return n.toLocaleString();
-  }
-
-  function formatPercent(n) {
-    if (n === undefined || n === null) return '0%';
-    return (n * 100).toFixed(1) + '%';
-  }
-
-  function statusClass(status) {
-    if (!status) return '';
-    const s = status.toLowerCase();
-    if (s === 'accelerating') return 'accelerating';
-    if (s === 'slowing') return 'slowing';
-    if (s === 'steady') return 'steady';
-    return '';
-  }
-
-  // ============================================================
-  // RENDER FUNCTIONS
-  // ============================================================
-  function renderMeta(meta) {
-    if (!meta) return;
-    lastActivityEl.textContent = timeAgo(meta.lastActivityTimestamp);
-    updatedAtEl.textContent = timeAgo(meta.generatedTimestamp);
-    // Status badge
-    const state = meta.state || 'INACTIVE';
-    const stateLower = state.toLowerCase();
-    let label = state;
-    let cls = 'status-badge';
-    if (stateLower === 'live') cls += ' live pulse';
-    else if (stateLower === 'break') cls += ' break';
-    else cls += ' pre_shift';
-    statusBadge.className = cls;
-    statusBadge.textContent = label;
-  }
-
-  function renderSummary(summary) {
-    if (!summary) return;
-    // Transfers
-    kpi.transfers.value.textContent = formatNumber(summary.transfers?.value);
-    kpi.transfers.rate.textContent = 'FPH ' + (summary.transfers?.rate || 0).toFixed(1);
-    const tStatus = summary.transfers?.status || '';
-    kpi.transfers.status.textContent = tStatus || '—';
-    kpi.transfers.status.className = 'kpi-status ' + statusClass(tStatus);
-
-    // Qualified
-    kpi.qualified.value.textContent = formatNumber(summary.qualified?.value);
-    kpi.qualified.rate.textContent = 'QPH ' + (summary.qualified?.rate || 0).toFixed(1);
-    const qStatus = summary.qualified?.status || '';
-    kpi.qualified.status.textContent = qStatus || '—';
-    kpi.qualified.status.className = 'kpi-status ' + statusClass(qStatus);
-
-    // Converted
-    kpi.converted.value.textContent = formatNumber(summary.converted?.value);
-    const goal = summary.converted?.goal || 0;
-    const progress = summary.converted?.progress || 0;
-    kpi.converted.progress.textContent = 'Goal ' + formatPercent(progress) + (goal > 0 ? ` (${formatNumber(goal)})` : '');
-
-    // Not Qualified
-    kpi.notQualified.value.textContent = formatNumber(summary.notQualified?.value);
-    kpi.notQualified.rate.textContent = 'DNQ ' + formatPercent(summary.notQualified?.rate || 0);
-
-    // Declined
-    kpi.declined.value.textContent = formatNumber(summary.declined?.value);
-    kpi.declined.rate.textContent = 'Drop ' + formatPercent(summary.declined?.rate || 0);
-  }
-
-  function renderReviews(reviews) {
-    if (!reviews || reviews.length === 0) {
-      reviewsContainer.innerHTML = '<div class="text-xs text-secondary">No reviews yet</div>';
-      reviewCount.textContent = '0';
-      return;
-    }
-    // filter out placeholders
-    const real = reviews.filter(r => !r.isPlaceholder);
-    reviewCount.textContent = real.length;
-    if (real.length === 0) {
-      reviewsContainer.innerHTML = '<div class="text-xs text-secondary">No reviews yet</div>';
-      return;
-    }
-    let html = '';
-    real.forEach(r => {
-      const time = new Date(r.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      html += `
-        <div class="review-row">
-          <span class="review-time">${time}</span>
-          <span class="review-agent">${r.agent || '—'}</span>
-          <span class="review-dispo">${r.dispo || '—'}</span>
-          <span class="review-outcome">${r.outcome || '—'}</span>
-        </div>
-      `;
-    });
-    reviewsContainer.innerHTML = html;
-  }
-
-  function renderLeaderboard(leaderboard) {
-    if (!leaderboard || leaderboard.length === 0) {
-      agentTbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary text-sm">No agents</td></tr>';
-      agentCount.textContent = '0 agents';
-      return;
-    }
-    const real = leaderboard.filter(a => !a.isPlaceholder);
-    agentCount.textContent = real.length + ' agents';
-    if (real.length === 0) {
-      agentTbody.innerHTML = '<tr><td colspan="6" class="text-center text-secondary text-sm">No agents</td></tr>';
-      return;
-    }
-    let html = '';
-    real.forEach(a => {
-      const last = a.lastActivity ? timeAgo(a.lastActivity) : '—';
-      html += `
-        <tr>
-          <td class="font-medium">${a.agent || 'Unknown'}</td>
-          <td class="text-center">${a.transfers || 0}</td>
-          <td class="text-center">${a.qualified || 0}</td>
-          <td class="text-center">${a.converted || 0}</td>
-          <td class="text-center">${a.dnq || 0}</td>
-          <td class="text-right text-secondary text-sm">${last}</td>
-        </tr>
-      `;
-    });
-    agentTbody.innerHTML = html;
-  }
-
-  function renderChart(trend) {
-    if (!trend) return;
-    const transfers = trend.transfers || [];
-    const qualified = trend.qualified || [];
-    const converted = trend.converted || [];
-
-    // Labels: hour strings
-    const labels = transfers.map(p => p.hour || '');
-
-    // Values (real numbers)
-    const tData = transfers.map(p => p.value || 0);
-    const qData = qualified.map(p => p.value || 0);
-    const cData = converted.map(p => p.value || 0);
-
-    const ctx = document.getElementById('trend-chart').getContext('2d');
-
-    if (chartInstance) {
-      chartInstance.destroy();
+    .meta-block .value {
+      font-size 14px;
+      font-weight 500;
+      color var(--text);
     }
 
-    chartInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Transfers',
-            data: tData,
-            borderColor: '#2563eb',
-            backgroundColor: 'transparent',
-            tension: 0.2,
-            pointRadius: 2,
-            pointHoverRadius: 5,
-            borderWidth: 2,
-          },
-          {
-            label: 'Qualified',
-            data: qData,
-            borderColor: '#16a34a',
-            backgroundColor: 'transparent',
-            tension: 0.2,
-            pointRadius: 2,
-            pointHoverRadius: 5,
-            borderWidth: 2,
-          },
-          {
-            label: 'Converted',
-            data: cData,
-            borderColor: '#059669',
-            backgroundColor: 'transparent',
-            tension: 0.2,
-            pointRadius: 2,
-            pointHoverRadius: 5,
-            borderWidth: 2,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                return context.dataset.label + ': ' + context.parsed.y;
+     ── Chart ── 
+    #trend-chart {
+      width 100% !important;
+      height 100% !important;
+      max-height 100%;
+    }
+
+     ── Segment Toggle ── 
+    .segment-group {
+      display inline-flex;
+      background var(--gray-light);
+      border-radius 6px;
+      padding 2px;
+    }
+    .segment-btn {
+      padding 4px 14px;
+      font-size 12px;
+      font-weight 500;
+      border none;
+      border-radius 5px;
+      background transparent;
+      color var(--text-secondary);
+      cursor pointer;
+      transition all 0.15s ease;
+    }
+    .segment-btn.active {
+      background var(--surface);
+      color var(--text);
+      box-shadow 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .segment-btnhovernot(.active) {
+      color var(--text);
+    }
+
+     ── Agent Table ── 
+    .agent-table-wrap {
+      overflow-y auto;
+      scrollbar-width thin;
+      scrollbar-color #d1d5db transparent;
+    }
+    .agent-table-wrap-webkit-scrollbar {
+      width 4px;
+    }
+    .agent-table-wrap-webkit-scrollbar-track {
+      background transparent;
+    }
+    .agent-table-wrap-webkit-scrollbar-thumb {
+      background #d1d5db;
+      border-radius 4px;
+    }
+
+    .agent-table {
+      width 100%;
+      border-collapse collapse;
+      font-size 13px;
+    }
+    .agent-table thead th {
+      position sticky;
+      top 0;
+      z-index 2;
+      background var(--gray-light);
+      font-weight 500;
+      font-size 11px;
+      text-transform uppercase;
+      letter-spacing 0.03em;
+      color var(--text-secondary);
+      padding 6px 10px;
+      text-align left;
+      border-bottom 1px solid var(--border);
+    }
+    .agent-table thead thnot(first-child) {
+      text-align center;
+    }
+    .agent-table thead thlast-child {
+      text-align right;
+    }
+    .agent-table tbody td {
+      padding 6px 10px;
+      border-bottom 1px solid var(--border);
+      font-size 13px;
+      color var(--text);
+      white-space nowrap;
+    }
+    .agent-table tbody tdnot(first-child) {
+      text-align center;
+    }
+    .agent-table tbody tdlast-child {
+      text-align right;
+      color var(--text-secondary);
+      font-size 12px;
+    }
+    .agent-table tbody trnth-child(even) {
+      background #fafbfc;
+    }
+    .agent-table tbody trhover {
+      background var(--gray-light);
+    }
+    .agent-table .agent-name {
+      font-weight 500;
+    }
+
+     ── Reviews Feed ── 
+    .reviews-feed {
+      overflow-y auto;
+      scrollbar-width thin;
+      scrollbar-color #d1d5db transparent;
+      max-height 100%;
+    }
+    .reviews-feed-webkit-scrollbar {
+      width 4px;
+    }
+    .reviews-feed-webkit-scrollbar-track {
+      background transparent;
+    }
+    .reviews-feed-webkit-scrollbar-thumb {
+      background #d1d5db;
+      border-radius 4px;
+    }
+
+    .review-item {
+      display flex;
+      align-items center;
+      padding 5px 0;
+      border-bottom 1px solid var(--border);
+      font-size 13px;
+      gap 12px;
+    }
+    .review-itemlast-child {
+      border-bottom none;
+    }
+    .review-time {
+      color var(--text-secondary);
+      font-size 12px;
+      width 70px;
+      flex-shrink 0;
+    }
+    .review-agent {
+      font-weight 500;
+      width 100px;
+      flex-shrink 0;
+    }
+    .review-dispo,
+    .review-outcome {
+      flex-shrink 0;
+    }
+    .review-dispo .pill,
+    .review-outcome .pill {
+      display inline-block;
+      padding 1px 10px;
+      border-radius 12px;
+      font-size 11px;
+      font-weight 500;
+      letter-spacing 0.01em;
+    }
+    .pill-qualified {
+      background #dcfce7;
+      color var(--green);
+    }
+    .pill-notqualified {
+      background #fee2e2;
+      color var(--red);
+    }
+    .pill-pending {
+      background var(--gray-light);
+      color var(--gray);
+    }
+    .pill-converted {
+      background #d1fae5;
+      color var(--emerald);
+    }
+    .pill-declined {
+      background #fef3c7;
+      color var(--amber);
+    }
+    .pill-callback {
+      background #fef3c7;
+      color var(--amber);
+    }
+    .pill-notconverted {
+      background var(--gray-light);
+      color var(--gray);
+    }
+
+     ── Empty State ── 
+    .empty-state {
+      color var(--text-secondary);
+      font-size 13px;
+      text-align center;
+      padding 16px 0;
+    }
+
+     ── Responsive tweaks ── 
+    @media (max-width 1200px) {
+      body {
+        padding 12px 16px;
+      }
+      .kpi-value {
+        font-size 26px;
+      }
+      .agent-table {
+        font-size 12px;
+      }
+      .agent-table tbody td {
+        font-size 12px;
+        padding 4px 8px;
+      }
+      .review-item {
+        font-size 12px;
+      }
+    }
+    @media (max-width 1024px) {
+      .kpi-value {
+        font-size 22px;
+      }
+      .kpi-label {
+        font-size 10px;
+      }
+      .kpi-sub {
+        font-size 11px;
+      }
+      .meta-block .value {
+        font-size 12px;
+      }
+    }
+
+     ── Utility ── 
+    .text-secondary {
+      color var(--text-secondary);
+    }
+    .border-subtle {
+      border-color var(--border);
+    }
+    .bg-muted {
+      background var(--gray-light);
+    }
+    .gap-2.5 {
+      gap 10px;
+    }
+    .flex-1 {
+      flex 1;
+    }
+    .min-h-0 {
+      min-height 0;
+    }
+  style
+head
+body
+  div class=dashboard id=app
+
+    !-- ============================================================ --
+    !-- HEADER --
+    !-- ============================================================ --
+    header class=flex items-center justify-between flex-shrink-0 style=height68px;
+      div class=flex items-center gap-3
+        div class=flex items-center justify-center rounded-lg bg-blue-600 text-white w-10 h-10
+          i data-lucide=layout-dashboard class=w-5 h-5 stroke-[1.75]i
+        div
+        div
+          h1 class=text-xl font-semibold tracking-tight leading-tightRealtime Dashboardh1
+          p class=text-xs text-secondary leading-tightLive Operations Overviewp
+        div
+      div
+      div class=flex items-center gap-5
+        div class=meta-block
+          span class=labelLast Activityspan
+          span class=value id=lastActivity—span
+        div
+        div class=meta-block
+          span class=labelUpdatedspan
+          span class=value id=updatedAt—span
+        div
+        div id=statusBadge class=status-badge—div
+      div
+    header
+
+    !-- ============================================================ --
+    !-- KPI CARDS (5 across) --
+    !-- ============================================================ --
+    section class=grid grid-cols-5 gap-3 flex-shrink-0
+      !-- Transfers --
+      div class=card p-4 flex flex-col
+        div class=flex items-center gap-2 mb-0.5
+          div class=kpi-icon-wrap style=background#dbeafe;
+            i data-lucide=arrow-left-right class=text-blue-600i
+          div
+          span class=kpi-labelTransfersspan
+        div
+        div class=kpi-value id=kpi-transfers-value0div
+        div class=flex items-center gap-2 mt-0.5
+          span class=kpi-sub id=kpi-transfers-rateFPH 0.0span
+          span class=kpi-status empty id=kpi-transfers-status—span
+        div
+      div
+
+      !-- Qualified --
+      div class=card p-4 flex flex-col
+        div class=flex items-center gap-2 mb-0.5
+          div class=kpi-icon-wrap style=background#dcfce7;
+            i data-lucide=check-circle class=text-green-600i
+          div
+          span class=kpi-labelQualifiedspan
+        div
+        div class=kpi-value id=kpi-qualified-value0div
+        div class=flex items-center gap-2 mt-0.5
+          span class=kpi-sub id=kpi-qualified-rateQPH 0.0span
+          span class=kpi-status empty id=kpi-qualified-status—span
+        div
+      div
+
+      !-- Converted --
+      div class=card p-4 flex flex-col
+        div class=flex items-center gap-2 mb-0.5
+          div class=kpi-icon-wrap style=background#d1fae5;
+            i data-lucide=trending-up class=text-emerald-600i
+          div
+          span class=kpi-labelConvertedspan
+        div
+        div class=kpi-value id=kpi-converted-value0div
+        div class=flex flex-col gap-0.5 mt-0.5
+          span class=kpi-sub id=kpi-converted-progressGoal 0%span
+          div class=kpi-progress-bar w-full
+            div class=fill id=kpi-converted-bar style=width0%;div
+          div
+          span class=text-xs text-secondary id=kpi-converted-remaining0 remainingspan
+        div
+      div
+
+      !-- Not Qualified --
+      div class=card p-4 flex flex-col
+        div class=flex items-center gap-2 mb-0.5
+          div class=kpi-icon-wrap style=background#fee2e2;
+            i data-lucide=x-circle class=text-red-600i
+          div
+          span class=kpi-labelNot Qualifiedspan
+        div
+        div class=kpi-value id=kpi-notqualified-value0div
+        div class=flex items-center gap-2 mt-0.5
+          span class=kpi-sub id=kpi-notqualified-rateDNQ 0.0%span
+        div
+      div
+
+      !-- Declined --
+      div class=card p-4 flex flex-col
+        div class=flex items-center gap-2 mb-0.5
+          div class=kpi-icon-wrap style=background#fef3c7;
+            i data-lucide=alert-circle class=text-amber-600i
+          div
+          span class=kpi-labelDeclinedspan
+        div
+        div class=kpi-value id=kpi-declined-value0div
+        div class=flex items-center gap-2 mt-0.5
+          span class=kpi-sub id=kpi-declined-rateDrop 0.0%span
+        div
+      div
+    section
+
+    !-- ============================================================ --
+    !-- CHART + AGENT TABLE (flex row, fills remaining space) --
+    !-- ============================================================ --
+    div class=flex gap-3 flex-1 min-h-0
+      !-- Chart (left) --
+      div class=card flex-1 p-4 flex flex-col min-h-0 style=flex3;
+        div class=flex items-center justify-between flex-shrink-0 mb-3
+          div
+            span class=text-sm font-mediumHourly Performancespan
+            span class=text-xs text-secondary ml-2Current Shiftspan
+          div
+          div class=segment-group
+            button class=segment-btn active data-metric=transfersTransfersbutton
+            button class=segment-btn data-metric=qualifiedQualifiedbutton
+          div
+        div
+        div class=flex-1 min-h-0 style=positionrelative;
+          canvas id=trend-chartcanvas
+        div
+      div
+
+      !-- Agent Table (right) --
+      div class=card flex-1 p-4 flex flex-col min-h-0 style=flex2;
+        div class=flex items-center justify-between flex-shrink-0 mb-2
+          span class=text-sm font-mediumAgent Performancespan
+          span class=text-xs text-secondary id=agent-count0 agentsspan
+        div
+        div class=agent-table-wrap flex-1 min-h-0
+          table class=agent-table
+            thead
+              tr
+                thAgentth
+                thTransfersth
+                thQualifiedth
+                thConvertedth
+                thDNQth
+                th style=text-alignright;Last Activityth
+              tr
+            thead
+            tbody id=agent-tbody
+              !-- rows inserted by JS --
+            tbody
+          table
+        div
+      div
+    div
+
+    !-- ============================================================ --
+    !-- LATEST REVIEWS (full width, fixed height) --
+    !-- ============================================================ --
+    div class=card p-4 flex flex-col flex-shrink-0 style=height190px;
+      div class=flex items-center justify-between flex-shrink-0 mb-2
+        span class=text-sm font-mediumLatest Reviewsspan
+        span class=text-xs text-secondary id=review-count0span
+      div
+      div class=reviews-feed flex-1 min-h-0 id=reviews-container
+        !-- rows inserted by JS --
+      div
+    div
+
+  div
+
+  !-- ============================================================ --
+  !-- JAVASCRIPT --
+  !-- ============================================================ --
+  script
+     ──────────────────────────────────────────────────────────────
+     FIREBASE CONFIG
+     ──────────────────────────────────────────────────────────────
+    const firebaseConfig = {
+      databaseURL httpsperformance-dashboard-c7017-default-rtdb.firebaseio.com
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const dbRef = db.ref('transfers_dashboard');
+
+     ──────────────────────────────────────────────────────────────
+     DOM REFS
+     ──────────────────────────────────────────────────────────────
+    const $ = id = document.getElementById(id);
+
+    const lastActivityEl = $('lastActivity');
+    const updatedAtEl = $('updatedAt');
+    const statusBadge = $('statusBadge');
+
+    const kpi = {
+      transfers { value $('kpi-transfers-value'), rate $('kpi-transfers-rate'), status $('kpi-transfers-status') },
+      qualified { value $('kpi-qualified-value'), rate $('kpi-qualified-rate'), status $('kpi-qualified-status') },
+      converted { value $('kpi-converted-value'), progress $('kpi-converted-progress'), bar $('kpi-converted-bar'),
+        remaining $('kpi-converted-remaining') },
+      notQualified { value $('kpi-notqualified-value'), rate $('kpi-notqualified-rate') },
+      declined { value $('kpi-declined-value'), rate $('kpi-declined-rate') }
+    };
+
+    const agentTbody = $('agent-tbody');
+    const agentCount = $('agent-count');
+    const reviewsContainer = $('reviews-container');
+    const reviewCount = $('review-count');
+
+    const segmentBtns = document.querySelectorAll('.segment-btn');
+    const chartCanvas = document.getElementById('trend-chart');
+
+    let chartInstance = null;
+    let currentTrendData = null;
+    let currentMetric = 'transfers';
+
+     ──────────────────────────────────────────────────────────────
+     HELPERS
+     ──────────────────────────────────────────────────────────────
+    function timeAgo(isoString) {
+      if (!isoString) return '—';
+      const now = Date.now();
+      const then = new Date(isoString).getTime();
+      const diff = Math.max(0, now - then);
+      const seconds = Math.floor(diff  1000);
+      if (seconds  60) return seconds + 's ago';
+      const minutes = Math.floor(seconds  60);
+      if (minutes  60) return minutes + 'm ago';
+      const hours = Math.floor(minutes  60);
+      if (hours  24) return hours + 'h ago';
+      return new Date(isoString).toLocaleString();
+    }
+
+    function formatNumber(n) {
+      if (n === undefined  n === null  isNaN(n)) return '0';
+      return n.toLocaleString();
+    }
+
+    function formatPercent(n) {
+      if (n === undefined  n === null  isNaN(n)) return '0%';
+      return (n  100).toFixed(1) + '%';
+    }
+
+    function statusClass(status) {
+      if (!status) return 'empty';
+      const s = status.toLowerCase();
+      if (s === 'accelerating') return 'accelerating';
+      if (s === 'slowing') return 'slowing';
+      if (s === 'steady') return 'steady';
+      return 'empty';
+    }
+
+    function statusLabel(status) {
+      if (!status) return '—';
+      if (status === 'Accelerating') return 'Accelerating';
+      if (status === 'Slowing') return 'Slowing';
+      if (status === 'Steady') return 'Steady';
+      return '—';
+    }
+
+    function getPillClass(value, type) {
+      const v = String(value  '').toLowerCase();
+      if (type === 'dispo') {
+        if (v === 'qualified') return 'pill-qualified';
+        if (v === 'not qualified') return 'pill-notqualified';
+        if (v === 'pending') return 'pill-pending';
+        return 'pill-pending';
+      }
+      if (type === 'outcome') {
+        if (v === 'converted') return 'pill-converted';
+        if (v === 'declined') return 'pill-declined';
+        if (v === 'call back') return 'pill-callback';
+        if (v === 'not converted') return 'pill-notconverted';
+        if (v === 'pending') return 'pill-pending';
+        return 'pill-pending';
+      }
+      return '';
+    }
+
+     ──────────────────────────────────────────────────────────────
+     RENDER FUNCTIONS
+     ──────────────────────────────────────────────────────────────
+
+    function renderMeta(meta) {
+      if (!meta) return;
+      lastActivityEl.textContent = timeAgo(meta.lastActivityTimestamp);
+      updatedAtEl.textContent = timeAgo(meta.generatedTimestamp);
+
+      const state = meta.state  'INACTIVE';
+      const stateLower = state.toLowerCase();
+      let label = state;
+      let cls = 'status-badge';
+      if (stateLower === 'live') cls += ' live pulse';
+      else if (stateLower === 'break') cls += ' break';
+      else if (stateLower === 'pre_shift') cls += ' pre_shift';
+      else if (stateLower === 'post_shift') cls += ' post_shift';
+      else cls += ' inactive';
+      statusBadge.className = cls;
+      statusBadge.textContent = label;
+    }
+
+    function renderSummary(summary) {
+      if (!summary) return;
+
+      const t = summary.transfers  {};
+      kpi.transfers.value.textContent = formatNumber(t.value);
+      kpi.transfers.rate.textContent = 'FPH ' + (t.rate  0).toFixed(1);
+      const ts = t.status  '';
+      kpi.transfers.status.textContent = statusLabel(ts);
+      kpi.transfers.status.className = 'kpi-status ' + statusClass(ts);
+
+      const q = summary.qualified  {};
+      kpi.qualified.value.textContent = formatNumber(q.value);
+      kpi.qualified.rate.textContent = 'QPH ' + (q.rate  0).toFixed(1);
+      const qs = q.status  '';
+      kpi.qualified.status.textContent = statusLabel(qs);
+      kpi.qualified.status.className = 'kpi-status ' + statusClass(qs);
+
+      const c = summary.converted  {};
+      kpi.converted.value.textContent = formatNumber(c.value);
+      const goal = c.goal  0;
+      const progress = c.progress  0;
+      kpi.converted.progress.textContent = 'Goal ' + formatPercent(progress);
+      kpi.converted.bar.style.width = Math.min(progress  100, 100) + '%';
+      const remaining = Math.max(0, goal - (c.value  0));
+      kpi.converted.remaining.textContent = remaining + ' remaining';
+
+      const nq = summary.notQualified  {};
+      kpi.notQualified.value.textContent = formatNumber(nq.value);
+      kpi.notQualified.rate.textContent = 'DNQ ' + formatPercent(nq.rate  0);
+
+      const d = summary.declined  {};
+      kpi.declined.value.textContent = formatNumber(d.value);
+      kpi.declined.rate.textContent = 'Drop ' + formatPercent(d.rate  0);
+    }
+
+    function renderLeaderboard(leaderboard) {
+      if (!leaderboard  leaderboard.length === 0) {
+        agentTbody.innerHTML =
+          'trtd colspan=6 class=empty-stateNo agent data availabletdtr';
+        agentCount.textContent = '0 agents';
+        return;
+      }
+      const real = leaderboard.filter(a = !a.isPlaceholder);
+      agentCount.textContent = real.length + ' agents';
+      if (real.length === 0) {
+        agentTbody.innerHTML =
+          'trtd colspan=6 class=empty-stateNo agent data availabletdtr';
+        return;
+      }
+      let html = '';
+      real.forEach(a = {
+        const last = a.lastActivity  timeAgo(a.lastActivity)  '—';
+        html += `
+          tr
+            td class=agent-name${a.agent  'Unknown'}td
+            td${a.transfers  0}td
+            td${a.qualified  0}td
+            td${a.converted  0}td
+            td${a.dnq  0}td
+            td${last}td
+          tr
+        `;
+      });
+      agentTbody.innerHTML = html;
+    }
+
+    function renderReviews(reviews) {
+      if (!reviews  reviews.length === 0) {
+        reviewsContainer.innerHTML = 'div class=empty-stateNo reviews yetdiv';
+        reviewCount.textContent = '0';
+        return;
+      }
+      const real = reviews.filter(r = !r.isPlaceholder);
+      reviewCount.textContent = real.length;
+      if (real.length === 0) {
+        reviewsContainer.innerHTML = 'div class=empty-stateNo reviews yetdiv';
+        return;
+      }
+      let html = '';
+      real.forEach(r = {
+        const time = new Date(r.time).toLocaleTimeString([], { hour '2-digit', minute '2-digit' });
+        const dispoPill = getPillClass(r.dispo, 'dispo');
+        const outcomePill = getPillClass(r.outcome, 'outcome');
+        html += `
+          div class=review-item
+            span class=review-time${time}span
+            span class=review-agent${r.agent  '—'}span
+            span class=review-dispospan class=pill ${dispoPill}${r.dispo  '—'}spanspan
+            span class=review-outcomespan class=pill ${outcomePill}${r.outcome  '—'}spanspan
+          div
+        `;
+      });
+      reviewsContainer.innerHTML = html;
+    }
+
+    function renderChart(trend) {
+      if (!trend) return;
+      currentTrendData = trend;
+
+      const metric = currentMetric;
+      const datasetMap = {
+        transfers { data trend.transfers  [], label 'Transfers', color '#2563eb' },
+        qualified { data trend.qualified  [], label 'Qualified', color '#16a34a' }
+      };
+      const ds = datasetMap[metric]  datasetMap.transfers;
+      const points = ds.data  [];
+      const labels = points.map(p = p.hour  '');
+      const values = points.map(p = p.value  0);
+
+      const ctx = chartCanvas.getContext('2d');
+
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+
+      chartInstance = new Chart(ctx, {
+        type 'line',
+        data {
+          labels labels,
+          datasets [{
+            label ds.label,
+            data values,
+            borderColor ds.color,
+            backgroundColor 'transparent',
+            tension 0.25,
+            pointRadius 2.5,
+            pointHoverRadius 6,
+            pointBackgroundColor ds.color,
+            borderWidth 2,
+          }]
+        },
+        options {
+          responsive true,
+          maintainAspectRatio false,
+          plugins {
+            legend { display false },
+            tooltip {
+              callbacks {
+                label function(context) {
+                  return context.dataset.label + ' ' + context.parsed.y;
+                }
               }
             }
-          }
-        },
-        scales: {
-          x: {
-            grid: { display: true, color: '#f1f5f9' },
-            ticks: { font: { size: 10 }, color: '#6b7280', maxTicksLimit: 15 }
           },
-          y: {
-            beginAtZero: true,
-            grid: { color: '#f1f5f9' },
-            ticks: { font: { size: 10 }, color: '#6b7280' }
+          scales {
+            x {
+              grid { display true, color '#f1f5f9', drawTicks false },
+              ticks { font { size 10 }, color '#6b7280', maxTicksLimit 16 }
+            },
+            y {
+              beginAtZero true,
+              grid { color '#f1f5f9', drawTicks false },
+              ticks { font { size 10 }, color '#6b7280', stepSize Math.ceil(Math.max(1, Math.max(...values)  5)) }
+            }
+          },
+          interaction {
+            mode 'index',
+            intersect false
           }
-        },
-        interaction: {
-          mode: 'index',
-          intersect: false
         }
-      }
-    });
-  }
-
-  // ============================================================
-  // FULL UPDATE
-  // ============================================================
-  function updateDashboard(data) {
-    if (!data) return;
-    currentData = data;
-    const { summary, trend, leaderboard, reviews, meta } = data;
-    renderMeta(meta);
-    renderSummary(summary);
-    renderReviews(reviews);
-    renderLeaderboard(leaderboard);
-    renderChart(trend);
-  }
-
-  // ============================================================
-  // FIREBASE REALTIME LISTENER
-  // ============================================================
-  dbRef.on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      updateDashboard(data);
-    } else {
-      console.warn('No data in Firebase');
+      });
     }
-  }, (error) => {
-    console.error('Firebase listener error:', error);
-  });
 
-  // ============================================================
-  // INITIALIZE LUCIDE ICONS
-  // ============================================================
-  lucide.createIcons();
+    function updateDashboard(data) {
+      if (!data) return;
+      const { summary, trend, leaderboard, reviews, meta } = data;
+      renderMeta(meta);
+      renderSummary(summary);
+      renderLeaderboard(leaderboard);
+      renderReviews(reviews);
+      renderChart(trend);
+    }
 
-  // ============================================================
-  // POLLING FALLBACK (in case realtime is slow)
-  // ============================================================
-  // Not needed; Firebase listener handles updates.
-  // We can also add a manual refresh button if desired, but spec didn't request.
-</script>
-</body>
-</html>
+     ──────────────────────────────────────────────────────────────
+     SEGMENT TOGGLE
+     ──────────────────────────────────────────────────────────────
+    segmentBtns.forEach(btn = {
+      btn.addEventListener('click', function() {
+        segmentBtns.forEach(b = b.classList.remove('active'));
+        this.classList.add('active');
+        currentMetric = this.dataset.metric;
+        if (currentTrendData) {
+          renderChart(currentTrendData);
+        }
+      });
+    });
+
+     ──────────────────────────────────────────────────────────────
+     FIREBASE REALTIME LISTENER
+     ──────────────────────────────────────────────────────────────
+    dbRef.on('value', (snapshot) = {
+      const data = snapshot.val();
+      if (data) {
+        updateDashboard(data);
+      } else {
+        console.warn('No data in Firebase');
+      }
+    }, (error) = {
+      console.error('Firebase listener error', error);
+    });
+
+     ──────────────────────────────────────────────────────────────
+     LUCIDE ICONS
+     ──────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () = {
+      lucide.createIcons();
+    });
+
+     ──────────────────────────────────────────────────────────────
+     HANDLE RESIZE – redraw chart
+     ──────────────────────────────────────────────────────────────
+    let resizeTimer;
+    window.addEventListener('resize', () = {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() = {
+        if (chartInstance) {
+          chartInstance.resize();
+        }
+      }, 150);
+    });
+  script
+body
+html
