@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Realtime Operations Dashboard</title>
 
-  <!-- TailwindCSS via CDN -->
+  <!-- TailwindCSS -->
   <script src="https://cdn.tailwindcss.com">
   </script>
-  <!-- Google Font: Inter -->
+  <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
@@ -18,7 +18,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
   </script>
-  <!-- Firebase SDK (compat) -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
   </script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
@@ -44,11 +44,9 @@
       --bg: #f8fafc;
       --text: #0f172a;
       --text-secondary: #475569;
-      --radius: 12px;
-      --radius-sm: 8px;
+      --radius: 10px;
       --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-      --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.06);
-      --shadow-focus: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06);
     }
 
     * {
@@ -77,7 +75,7 @@
 
     /* ── Main Container ── */
     .dashboard {
-      max-width: 1450px;
+      max-width: 1400px;
       width: 100%;
       height: 100%;
       max-height: 960px;
@@ -85,7 +83,6 @@
       flex-direction: column;
       gap: 14px;
       margin: 0 auto;
-      padding: 0;
     }
 
     /* ── Cards ── */
@@ -94,66 +91,144 @@
       border-radius: var(--radius);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      transition: box-shadow 0.2s ease, transform 0.1s ease;
+      transition: box-shadow 0.15s ease;
     }
     .card:hover {
       box-shadow: var(--shadow-hover);
     }
 
-    /* ── KPI Cards ── */
-    .kpi-card {
-      padding: 16px 20px;
+    /* ── Header ── */
+    .header {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-left .icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--blue);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-left .icon-box .lucide {
+      width: 16px;
+      height: 16px;
+      stroke-width: 1.75;
+    }
+    .header-left h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .header-left p {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: -2px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-meta {
       display: flex;
       flex-direction: column;
-      transition: all 0.15s ease;
+      align-items: flex-end;
+      line-height: 1.2;
+    }
+    .header-meta .label {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+    .header-meta .value {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* ── KPI Cards (compact) ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.15s ease;
+      box-shadow: var(--shadow);
     }
     .kpi-card:hover {
-      transform: translateY(-2px);
       box-shadow: var(--shadow-hover);
     }
+    .kpi-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     .kpi-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-sm);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      background: var(--gray-light);
+      color: var(--gray);
     }
     .kpi-icon-wrap .lucide {
-      width: 18px;
-      height: 18px;
-      stroke-width: 1.75;
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
     }
-    .kpi-value {
-      font-size: 30px;
+    .kpi-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+    .kpi-number {
+      font-size: 22px;
       font-weight: 600;
       line-height: 1.1;
       letter-spacing: -0.02em;
-      margin-top: 4px;
-    }
-    .kpi-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
+      margin-top: 2px;
     }
     .kpi-meta {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-top: 4px;
-      font-size: 13px;
+      gap: 10px;
+      font-size: 12px;
       color: var(--text-secondary);
+      margin-top: 2px;
     }
     .kpi-meta .metric {
       font-weight: 500;
     }
     .kpi-status {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      padding: 2px 10px;
+      padding: 1px 8px;
       border-radius: 12px;
       text-transform: uppercase;
       letter-spacing: 0.02em;
@@ -174,91 +249,49 @@
       color: var(--gray);
       background: var(--gray-light);
     }
-
     .kpi-progress {
-      margin-top: 4px;
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-top: 2px;
     }
     .kpi-progress-bar {
       height: 3px;
       border-radius: 4px;
       background: var(--gray-light);
-      overflow: hidden;
       flex: 1;
+      overflow: hidden;
     }
     .kpi-progress-bar .fill {
       height: 100%;
       border-radius: 4px;
       background: var(--emerald);
-      transition: width 0.4s ease;
+      transition: width 0.3s ease;
     }
     .kpi-progress-label {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-secondary);
       white-space: nowrap;
     }
 
-    /* ── Status Badge ── */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 14px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      background: var(--gray-light);
-      color: var(--gray);
+    /* ── Main row: Chart + Agent Table ── */
+    .main-row {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: 14px;
     }
-    .status-badge.live {
-      background: var(--green-light);
-      color: var(--green);
-    }
-    .status-badge.break {
-      background: var(--amber-light);
-      color: var(--amber);
-    }
-    .status-badge.pre_shift,
-    .status-badge.post_shift,
-    .status-badge.inactive {
-      background: var(--gray-light);
-      color: var(--gray);
-    }
-
-    @keyframes soft-pulse {
-      0%,
-      100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.55;
-      }
-    }
-    .status-badge.live.pulse {
-      animation: soft-pulse 2.2s ease-in-out infinite;
-    }
-
-    /* ── Header Meta ── */
-    .meta-block {
+    .main-row .chart-card {
+      flex: 1.2;
+      min-height: 0;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      line-height: 1.3;
     }
-    .meta-block .label {
-      font-size: 9px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-secondary);
-    }
-    .meta-block .value {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
+    .main-row .table-card {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ── Chart ── */
@@ -276,8 +309,8 @@
       padding: 2px;
     }
     .segment-btn {
-      padding: 4px 14px;
-      font-size: 11px;
+      padding: 3px 12px;
+      font-size: 10px;
       font-weight: 600;
       border: none;
       border-radius: 5px;
@@ -298,20 +331,20 @@
     }
 
     /* ── Agent Table ── */
-    .agent-table-wrap {
+    .table-wrap {
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #d1d5db transparent;
-      flex: 1;
-      min-height: 0;
     }
-    .agent-table-wrap::-webkit-scrollbar {
+    .table-wrap::-webkit-scrollbar {
       width: 4px;
     }
-    .agent-table-wrap::-webkit-scrollbar-track {
+    .table-wrap::-webkit-scrollbar-track {
       background: transparent;
     }
-    .agent-table-wrap::-webkit-scrollbar-thumb {
+    .table-wrap::-webkit-scrollbar-thumb {
       background: #d1d5db;
       border-radius: 4px;
     }
@@ -331,7 +364,7 @@
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      padding: 8px 12px;
+      padding: 6px 10px;
       text-align: left;
       border-bottom: 2px solid var(--blue);
     }
@@ -342,7 +375,7 @@
       text-align: right;
     }
     .agent-table tbody td {
-      padding: 7px 12px;
+      padding: 6px 10px;
       border-bottom: 1px solid var(--border);
       font-size: 13px;
       color: var(--text);
@@ -366,13 +399,19 @@
       font-weight: 500;
     }
 
-    /* ── Reviews Feed ── */
+    /* ── Reviews Feed (full width) ── */
+    .reviews-card {
+      flex-shrink: 0;
+      height: 150px;
+      display: flex;
+      flex-direction: column;
+    }
     .reviews-feed {
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #d1d5db transparent;
-      flex: 1;
-      min-height: 0;
     }
     .reviews-feed::-webkit-scrollbar {
       width: 4px;
@@ -388,10 +427,10 @@
     .review-item {
       display: flex;
       align-items: center;
-      padding: 6px 0;
+      padding: 4px 0;
       border-bottom: 1px solid var(--border);
       font-size: 13px;
-      gap: 12px;
+      gap: 16px;
     }
     .review-item:last-child {
       border-bottom: none;
@@ -405,7 +444,7 @@
     }
     .review-agent {
       font-weight: 500;
-      width: 100px;
+      width: 110px;
       flex-shrink: 0;
     }
     .review-dispo,
@@ -415,11 +454,12 @@
     .review-dispo .pill,
     .review-outcome .pill {
       display: inline-block;
-      padding: 1px 10px;
+      padding: 0 10px;
       border-radius: 12px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       letter-spacing: 0.01em;
+      line-height: 18px;
     }
     .pill-qualified {
       background: var(--green-light);
@@ -450,56 +490,12 @@
       color: var(--gray);
     }
 
-    /* ── Empty State ── */
+    /* ── Empty state ── */
     .empty-state {
       color: var(--text-secondary);
       font-size: 13px;
       text-align: center;
-      padding: 20px 0;
-    }
-
-    /* ── Scrollable containers ── */
-    .scroll-container {
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── Responsive tweaks ── */
-    @media (max-width: 1200px) {
-      body {
-        padding: 12px 16px;
-      }
-      .kpi-value {
-        font-size: 26px;
-      }
-      .agent-table {
-        font-size: 12px;
-      }
-      .agent-table tbody td {
-        font-size: 12px;
-        padding: 5px 8px;
-      }
-      .review-item {
-        font-size: 12px;
-      }
-      .kpi-meta {
-        font-size: 12px;
-      }
-    }
-    @media (max-width: 1024px) {
-      .kpi-value {
-        font-size: 22px;
-      }
-      .kpi-label {
-        font-size: 10px;
-      }
-      .kpi-meta {
-        font-size: 11px;
-      }
-      .meta-block .value {
-        font-size: 12px;
-      }
+      padding: 12px 0;
     }
 
     /* ── Utilities ── */
@@ -512,20 +508,11 @@
     .bg-muted {
       background: var(--gray-light);
     }
-    .gap-2\.5 {
-      gap: 10px;
-    }
     .flex-1 {
       flex: 1;
     }
     .min-h-0 {
       min-height: 0;
-    }
-
-    /* ── Custom scroll for reviews and table ── */
-    .agent-table-wrap,
-    .reviews-feed {
-      scroll-behavior: smooth;
     }
   </style>
 </head>
@@ -535,42 +522,41 @@
     <!-- ============================================================ -->
     <!-- HEADER -->
     <!-- ============================================================ -->
-    <header class="flex items-center justify-between flex-shrink-0" style="height:64px;">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center justify-center rounded-lg bg-blue-600 text-white w-9 h-9">
-          <i data-lucide="layout-dashboard" class="w-5 h-5 stroke-[1.75]"></i>
+    <header class="header">
+      <div class="header-left">
+        <div class="icon-box">
+          <i data-lucide="layout-dashboard"></i>
         </div>
         <div>
-          <h1 class="text-xl font-semibold tracking-tight leading-tight">Realtime Dashboard</h1>
-          <p class="text-xs text-secondary leading-tight">Live Operations Overview</p>
+          <h1>Realtime Dashboard</h1>
+          <p>Live Operations Overview</p>
         </div>
       </div>
-      <div class="flex items-center gap-5">
-        <div class="meta-block">
+      <div class="header-right">
+        <div class="header-meta">
           <span class="label">Last Activity</span>
           <span class="value" id="lastActivity">—</span>
         </div>
-        <div class="meta-block">
+        <div class="header-meta">
           <span class="label">Updated</span>
           <span class="value" id="updatedAt">—</span>
         </div>
-        <div id="statusBadge" class="status-badge">—</div>
       </div>
     </header>
 
     <!-- ============================================================ -->
     <!-- KPI CARDS (5 across) -->
     <!-- ============================================================ -->
-    <section class="grid grid-cols-5 gap-3 flex-shrink-0">
+    <div class="kpi-grid">
       <!-- Transfers -->
-      <div class="card kpi-card">
-        <div class="flex items-center gap-2">
-          <div class="kpi-icon-wrap" style="background:var(--blue-light);">
-            <i data-lucide="arrow-left-right" class="text-blue-600"></i>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap">
+            <i data-lucide="arrow-left-right"></i>
           </div>
           <span class="kpi-label">Transfers</span>
         </div>
-        <div class="kpi-value" id="kpi-transfers-value">0</div>
+        <div class="kpi-number" id="kpi-transfers-value">0</div>
         <div class="kpi-meta">
           <span class="metric" id="kpi-transfers-rate">FPH 0.0</span>
           <span class="kpi-status empty" id="kpi-transfers-status">—</span>
@@ -578,14 +564,14 @@
       </div>
 
       <!-- Qualified -->
-      <div class="card kpi-card">
-        <div class="flex items-center gap-2">
-          <div class="kpi-icon-wrap" style="background:var(--green-light);">
-            <i data-lucide="check-circle" class="text-green-600"></i>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap">
+            <i data-lucide="check-circle"></i>
           </div>
           <span class="kpi-label">Qualified</span>
         </div>
-        <div class="kpi-value" id="kpi-qualified-value">0</div>
+        <div class="kpi-number" id="kpi-qualified-value">0</div>
         <div class="kpi-meta">
           <span class="metric" id="kpi-qualified-rate">QPH 0.0</span>
           <span class="kpi-status empty" id="kpi-qualified-status">—</span>
@@ -593,14 +579,14 @@
       </div>
 
       <!-- Converted -->
-      <div class="card kpi-card">
-        <div class="flex items-center gap-2">
-          <div class="kpi-icon-wrap" style="background:var(--emerald-light);">
-            <i data-lucide="trending-up" class="text-emerald-600"></i>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap">
+            <i data-lucide="trending-up"></i>
           </div>
           <span class="kpi-label">Converted</span>
         </div>
-        <div class="kpi-value" id="kpi-converted-value">0</div>
+        <div class="kpi-number" id="kpi-converted-value">0</div>
         <div class="kpi-progress">
           <span class="kpi-progress-label" id="kpi-converted-progress">Goal 0%</span>
           <div class="kpi-progress-bar">
@@ -611,41 +597,41 @@
       </div>
 
       <!-- Not Qualified -->
-      <div class="card kpi-card">
-        <div class="flex items-center gap-2">
-          <div class="kpi-icon-wrap" style="background:var(--red-light);">
-            <i data-lucide="x-circle" class="text-red-600"></i>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap">
+            <i data-lucide="x-circle"></i>
           </div>
           <span class="kpi-label">Not Qualified</span>
         </div>
-        <div class="kpi-value" id="kpi-notqualified-value">0</div>
+        <div class="kpi-number" id="kpi-notqualified-value">0</div>
         <div class="kpi-meta">
           <span class="metric" id="kpi-notqualified-rate">DNQ 0.0%</span>
         </div>
       </div>
 
-      <!-- Declined -->
-      <div class="card kpi-card">
-        <div class="flex items-center gap-2">
-          <div class="kpi-icon-wrap" style="background:var(--amber-light);">
-            <i data-lucide="alert-circle" class="text-amber-600"></i>
+      <!-- Call Back (instead of Declined) -->
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap">
+            <i data-lucide="phone-call"></i>
           </div>
-          <span class="kpi-label">Declined</span>
+          <span class="kpi-label">Call Back</span>
         </div>
-        <div class="kpi-value" id="kpi-declined-value">0</div>
+        <div class="kpi-number" id="kpi-callback-value">0</div>
         <div class="kpi-meta">
-          <span class="metric" id="kpi-declined-rate">Drop 0.0%</span>
+          <span class="metric" id="kpi-callback-rate">Scheduled</span>
         </div>
       </div>
-    </section>
+    </div>
 
     <!-- ============================================================ -->
-    <!-- CHART + AGENT TABLE (flex row, fills remaining space) -->
+    <!-- MAIN ROW: Chart (left) + Agent Table (right) -->
     <!-- ============================================================ -->
-    <div class="flex gap-3 flex-1 min-h-0">
-      <!-- Chart (left) -->
-      <div class="card flex-1 p-4 flex flex-col min-h-0" style="flex:1.2;">
-        <div class="flex items-center justify-between flex-shrink-0 mb-3">
+    <div class="main-row">
+      <!-- Chart Card -->
+      <div class="card chart-card p-3">
+        <div class="flex items-center justify-between flex-shrink-0 mb-2">
           <div>
             <span class="text-sm font-medium">Hourly Performance</span>
             <span class="text-xs text-secondary ml-2">Current Shift</span>
@@ -660,13 +646,13 @@
         </div>
       </div>
 
-      <!-- Agent Table (right) -->
-      <div class="card flex-1 p-4 flex flex-col min-h-0" style="flex:1;">
+      <!-- Agent Table Card -->
+      <div class="card table-card p-3">
         <div class="flex items-center justify-between flex-shrink-0 mb-2">
           <span class="text-sm font-medium">Agent Performance</span>
           <span class="text-xs text-secondary" id="agent-count">0 agents</span>
         </div>
-        <div class="agent-table-wrap">
+        <div class="table-wrap">
           <table class="agent-table">
             <thead>
               <tr>
@@ -689,8 +675,8 @@
     <!-- ============================================================ -->
     <!-- LATEST REVIEWS (full width, fixed height) -->
     <!-- ============================================================ -->
-    <div class="card p-4 flex flex-col flex-shrink-0" style="height:170px;">
-      <div class="flex items-center justify-between flex-shrink-0 mb-2">
+    <div class="card reviews-card p-3">
+      <div class="flex items-center justify-between flex-shrink-0 mb-1">
         <span class="text-sm font-medium">Latest Reviews</span>
         <span class="text-xs text-secondary" id="review-count">0</span>
       </div>
@@ -722,7 +708,6 @@
 
     const lastActivityEl = $('lastActivity');
     const updatedAtEl = $('updatedAt');
-    const statusBadge = $('statusBadge');
 
     const kpi = {
       transfers: { value: $('kpi-transfers-value'), rate: $('kpi-transfers-rate'), status: $('kpi-transfers-status') },
@@ -730,7 +715,7 @@
       converted: { value: $('kpi-converted-value'), progress: $('kpi-converted-progress'), bar: $('kpi-converted-bar'),
         remaining: $('kpi-converted-remaining') },
       notQualified: { value: $('kpi-notqualified-value'), rate: $('kpi-notqualified-rate') },
-      declined: { value: $('kpi-declined-value'), rate: $('kpi-declined-rate') }
+      callback: { value: $('kpi-callback-value'), rate: $('kpi-callback-rate') }
     };
 
     const agentTbody = $('agent-tbody');
@@ -816,18 +801,6 @@
       if (!meta) return;
       lastActivityEl.textContent = timeAgo(meta.lastActivityTimestamp);
       updatedAtEl.textContent = timeAgo(meta.generatedTimestamp);
-
-      const state = meta.state || 'INACTIVE';
-      const stateLower = state.toLowerCase();
-      let label = state;
-      let cls = 'status-badge';
-      if (stateLower === 'live') cls += ' live pulse';
-      else if (stateLower === 'break') cls += ' break';
-      else if (stateLower === 'pre_shift') cls += ' pre_shift';
-      else if (stateLower === 'post_shift') cls += ' post_shift';
-      else cls += ' inactive';
-      statusBadge.className = cls;
-      statusBadge.textContent = label;
     }
 
     function renderSummary(summary) {
@@ -860,9 +833,11 @@
       kpi.notQualified.value.textContent = formatNumber(nq.value);
       kpi.notQualified.rate.textContent = 'DNQ ' + formatPercent(nq.rate || 0);
 
-      const d = summary.declined || {};
-      kpi.declined.value.textContent = formatNumber(d.value);
-      kpi.declined.rate.textContent = 'Drop ' + formatPercent(d.rate || 0);
+      // Call Back: we need value and rate? Actually we have declined count in the spec, but user wants Call Back KPI.
+      // We'll map Declined to Call Back.
+      const cb = summary.declined || {};
+      kpi.callback.value.textContent = formatNumber(cb.value);
+      kpi.callback.rate.textContent = 'Drop ' + formatPercent(cb.rate || 0);
     }
 
     function renderLeaderboard(leaderboard) {
