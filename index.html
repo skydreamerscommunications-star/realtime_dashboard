@@ -41,6 +41,9 @@
       --amber:     #f59e0b;  --amber-soft:     #fff8eb;  --amber-ink:     #b45309;
       --slate:     #64748b;  --slate-soft:     #f1f4f9;  --slate-ink:     #475569;
 
+      --charcoal:  #2d3748;
+      --charcoal-soft: #edf2f7;
+
       /* Radius */
       --r-sm: 8px;
       --r-md: 12px;
@@ -176,18 +179,20 @@
       gap: 13px;
     }
 
-    /* Application mark — blue tile, white bars. Blue and white, no black. */
+    /* Application mark — charcoal tile with subtle depth, white bars.
+       The blue has been replaced with a refined graphite tone so the logo
+       establishes identity without competing with the KPI colour system. */
     .header-left .icon-box {
       width: 40px;
       height: 40px;
       border-radius: var(--r-md);
-      background: var(--blue);
+      background: var(--charcoal);
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px -3px rgba(37, 99, 235, 0.5);
+      box-shadow: 0 4px 12px -4px rgba(45, 55, 72, 0.4);
     }
     .header-left .icon-box svg { width: 21px; height: 21px; display: block; }
 
@@ -1067,6 +1072,15 @@
       return '';
     }
 
+    // Convert "HH:00" to "h AM/PM" – e.g. "19:00" → "7 PM"
+    function formatHourLabel(hourStr) {
+      const hour = parseInt(hourStr, 10);
+      if (isNaN(hour)) return hourStr;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const h12 = hour % 12 || 12;
+      return h12 + ' ' + ampm;
+    }
+
     // ──────────────────────────────────────────────────────────────
     // RENDER FUNCTIONS
     // ──────────────────────────────────────────────────────────────
@@ -1189,7 +1203,8 @@
       };
       const ds = datasetMap[metric] || datasetMap.transfers;
       const points = ds.data || [];
-      const labels = points.map(p => p.hour || '');
+      // Convert labels to 12-hour format
+      const labels = points.map(p => formatHourLabel(p.hour || ''));
       const values = points.map(p => p.value || 0);
 
       const ctx = chartCanvas.getContext('2d');
