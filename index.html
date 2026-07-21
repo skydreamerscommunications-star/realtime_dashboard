@@ -35,8 +35,8 @@
       --text-muted:      #6b7686;
       --text-tertiary:   #8b95a6;
 
-      /* Semantic ink + washed fills. Fills are used for tiles and chips only. */
-      --blue:      #2b5fd0;  --blue-ink:      #1e4fc4;  --blue-w1:    #f3f7ff;  --blue-w2:    #e3ecfc;  --blue-edge:    #d8e4fa;
+      /* Semantic — solid colours for icon tiles, soft fills for chips */
+      --blue:      #2563eb;  --blue-ink:      #1d4ed8;  --blue-w1:    #f3f7ff;  --blue-w2:    #e3ecfc;  --blue-edge:    #d8e4fa;
       --green:     #16a34a;  --green-ink:     #15803d;  --green-w1:   #f3fbf6;  --green-w2:   #e3f5e9;  --green-edge:   #d7eede;
       --emerald:   #059669;  --emerald-ink:   #047857;  --emerald-w1: #f2fbf8;  --emerald-w2: #e0f4ee;  --emerald-edge: #d2ece4;
       --red:       #dc2626;  --red-ink:       #b91c1c;  --red-w1:     #fff5f5;  --red-w2:     #fde8e8;  --red-edge:     #f9dcdc;
@@ -142,9 +142,8 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      background: linear-gradient(180deg, var(--slate-w1) 0%, var(--slate-w2) 100%);
+      background: var(--surface-sunken);
       border: 1px solid var(--border);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
       color: var(--text-muted);
     }
     .section-icon-tile .lucide {
@@ -286,6 +285,9 @@
                    Number
          ──────────────────────────────
          Rate   Delta            Status
+
+       ICONS: Solid, vibrant backgrounds with white glyphs and strong shadows.
+       Each KPI card now carries its semantic colour with full visual weight.
        ========================================================================== */
     .kpi-grid {
       display: grid;
@@ -312,8 +314,8 @@
       gap: 12px;
       min-width: 0;
     }
-    /* Washed tile: a soft vertical wash, a hairline edge in the same hue, and
-       a one-pixel top highlight. The glyph carries the colour, not the fill. */
+    /* Solid tile, white glyph, strong shadow. Each metric owns a distinct
+       colour so the row can be read by shape before it is read by number. */
     .kpi-icon-wrap {
       width: 38px;
       height: 38px;
@@ -322,35 +324,34 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, var(--slate-w1) 0%, var(--slate-w2) 100%);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 1px rgba(15, 23, 41, 0.03);
-      color: var(--slate-ink);
+      color: #ffffff;
     }
     .kpi-icon-wrap .lucide {
       width: 18px;
       height: 18px;
-      stroke-width: 2;
+      stroke-width: 2.1;
     }
+
+    /* Card-specific icon colours — bold, saturated, with depth */
     .kpi-grid > .kpi-card:nth-child(1) .kpi-icon-wrap {
-      background: linear-gradient(180deg, var(--blue-w1) 0%, var(--blue-w2) 100%);
-      border-color: var(--blue-edge); color: var(--blue-ink);
+      background: var(--blue);
+      box-shadow: 0 5px 14px -4px rgba(37, 99, 235, 0.55);
     }
     .kpi-grid > .kpi-card:nth-child(2) .kpi-icon-wrap {
-      background: linear-gradient(180deg, var(--green-w1) 0%, var(--green-w2) 100%);
-      border-color: var(--green-edge); color: var(--green-ink);
+      background: var(--green);
+      box-shadow: 0 5px 14px -4px rgba(22, 163, 74, 0.55);
     }
     .kpi-grid > .kpi-card:nth-child(3) .kpi-icon-wrap {
-      background: linear-gradient(180deg, var(--emerald-w1) 0%, var(--emerald-w2) 100%);
-      border-color: var(--emerald-edge); color: var(--emerald-ink);
+      background: var(--emerald);
+      box-shadow: 0 5px 14px -4px rgba(5, 150, 105, 0.55);
     }
     .kpi-grid > .kpi-card:nth-child(4) .kpi-icon-wrap {
-      background: linear-gradient(180deg, var(--red-w1) 0%, var(--red-w2) 100%);
-      border-color: var(--red-edge); color: var(--red-ink);
+      background: var(--red);
+      box-shadow: 0 5px 14px -4px rgba(220, 38, 38, 0.50);
     }
     .kpi-grid > .kpi-card:nth-child(5) .kpi-icon-wrap {
-      background: linear-gradient(180deg, var(--amber-w1) 0%, var(--amber-w2) 100%);
-      border-color: var(--amber-edge); color: var(--amber-ink);
+      background: var(--amber);
+      box-shadow: 0 5px 14px -4px rgba(217, 119, 6, 0.55);
     }
 
     .kpi-head {
@@ -740,7 +741,6 @@
       background-repeat: no-repeat;
       background-position: center;
       background-size: 19px 19px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
     .empty-state::after {
       display: block;
@@ -1287,7 +1287,7 @@
 
       const metric = currentMetric;
       const datasetMap = {
-        transfers: { data: trend.transfers || [], label: 'Transfers', color: '#2b5fd0', rgb: '43, 95, 208' },
+        transfers: { data: trend.transfers || [], label: 'Transfers', color: '#2563eb', rgb: '37, 99, 235' },
         qualified: { data: trend.qualified || [], label: 'Qualified', color: '#16a34a', rgb: '22, 163, 74' }
       };
       const ds = datasetMap[metric] || datasetMap.transfers;
